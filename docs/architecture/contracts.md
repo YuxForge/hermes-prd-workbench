@@ -20,6 +20,10 @@ Update producer, consumer, tests and these descriptions together whenever the fo
 
 Estimate Schema describes canonical producer fields; runtime minimal validation also accepts documented name/type/qaDays aliases without rewriting the saved payload. Effort may use fractional precision beyond one decimal. Totals and scope remain Agent supplied; the service does not repair or reconcile them.
 
+Estimate exports display absent optional summary/item totals as “未提供”, not zero or a derived Agent conclusion. Supplied totals (including zero or inconsistent summaries) remain supplied values. Excel numeric column sums are display calculations only; a column with any missing item total remains incomplete rather than summing missing values as zero. The bundle overview follows the same missing-value convention. Regression: `EstimateExcelExporterTest` and `TaskBundleExporterTest.overviewDoesNotTurnMissingEstimateTotalIntoZero`.
+
+TEST_CASE `steps` accepts a string or ordered string array. XLSX exports preserve string text or present array entries as numbered lines, with wrapped-row height and frozen identifiers/header for reading. This is an export projection only; saved Agent steps are not rewritten. Regression: `TestCaseExcelExporterTest.preservesOrderedArrayStepsAndFitsWrappedRowsWithoutChangingPayload`.
+
 TECH_SPEC supports physical or local logical data models, structured index intent, local/view adapter method labels, and textual or structured error-code lists. UI and Markdown export render these values as text; stored results stay immutable. No HTTP transport or server database is invented for a browser-only solution.
 
 ## Browser origin transport

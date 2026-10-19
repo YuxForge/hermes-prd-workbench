@@ -8,11 +8,21 @@
 
 [中文说明](README.zh-CN.md) · [Quick start](#quick-start) · [Documentation](docs/README.md) · [Roadmap](https://github.com/YuxForge/hermes-prd-workbench/issues?q=is%3Aissue+is%3Aopen+label%3Aroadmap) · [Discussions](https://github.com/YuxForge/hermes-prd-workbench/discussions) · [Security](SECURITY.md)
 
-![Hermes PRD Workbench demo](docs/assets/hermes-prd-workbench-demo.gif)
+[![Procurement approval case: watch the 60-second walkthrough](docs/examples/procurement/overview.jpg)](docs/examples/procurement/walkthrough.mp4)
+
+[Watch the 60-second walkthrough](docs/examples/procurement/walkthrough.mp4) · [Download the example deliverables](docs/examples/procurement/deliverables.zip) · [Explore the complete case](docs/examples/procurement/README.md)
 
 Hermes PRD Workbench is an Apache-2.0 self-hosted workspace for product and engineering teams. Upload source material once, preserve the original Agent result, refine a separate working draft, and continue from the same context into reviews and downstream deliverables.
 
 Version **0.4.0-beta.2** is a fresh-install preview for a single instance on a local or trusted network. It has been validated on macOS arm64 and Windows 11 WSL2 with Docker Desktop Linux containers. Linux amd64 and native Windows deployments have not yet been declared supported.
+
+## A concrete example: resolve a purchasing-rule conflict
+
+One meeting note says manager approval is enough up to CNY 5,000; a follow-up says anything below CNY 10,000 needs no finance review. **A CNY 8,600 workstation takes a different approval route depending on which note a developer follows.**
+
+In this fully synthetic case, a real Hermes review identified eight blocking questions. A maintainer then recorded explicit fictional business decisions, generated a four-module PRD, and saved a separate working draft before producing a clickable prototype and engineering handoff drafts. The package includes the review and decisions, PRD files, HTML Demo, test-case XLSX, technical specification, and an assumption-based effort-estimate XLSX.
+
+Read the [input materials, results, remaining questions, and verification record](docs/examples/procurement/README.md). The recording is an edited replay of real browser interactions; 60 seconds is the video length, not model generation time. All materials are synthetic, model outputs need human review, and the static prototype is not a production procurement system. The walkthrough and generated business documents are in Chinese.
 
 ## What it produces
 

@@ -4,6 +4,7 @@ These documents describe the preview's current behavior. Historical internal pla
 
 | Topic | Entry |
 | --- | --- |
+| Flagship example, downloadable outputs and 60-second walkthrough | [Device procurement and approvals](examples/procurement/README.md) |
 | Product and requirements | [product.md](product.md) |
 | Architecture, runtime and data | [architecture/overview.md](architecture/overview.md) |
 | API, JSON and diagnostic contracts | [architecture/contracts.md](architecture/contracts.md) |
