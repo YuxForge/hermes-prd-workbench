@@ -240,12 +240,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   explorerTabBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
-      const targetTab = btn.getAttribute("data-tab");
+      const targetId = btn.getAttribute("data-target") || ("panel-" + btn.getAttribute("data-tab"));
       explorerTabBtns.forEach((b) => b.classList.remove("active"));
       explorerPanels.forEach((p) => p.classList.remove("active"));
 
       btn.classList.add("active");
-      const targetPanel = document.getElementById("panel-" + targetTab);
+      const targetPanel = document.getElementById(targetId);
       if (targetPanel) {
         targetPanel.classList.add("active");
       }
@@ -257,12 +257,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   techspecSubtabBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
-      const targetSubtab = btn.getAttribute("data-subtab");
+      const targetId = btn.getAttribute("data-sub") || ("subpanel-" + btn.getAttribute("data-subtab"));
       techspecSubtabBtns.forEach((b) => b.classList.remove("active"));
       techspecSubpanels.forEach((p) => p.classList.remove("active"));
 
       btn.classList.add("active");
-      const targetSubpanel = document.getElementById("subpanel-" + targetSubtab);
+      const targetSubpanel = document.getElementById(targetId);
       if (targetSubpanel) {
         targetSubpanel.classList.add("active");
       }
@@ -274,13 +274,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   tcFilterBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
-      const moduleName = btn.getAttribute("data-module");
+      const filterVal = btn.getAttribute("data-filter") || btn.getAttribute("data-module");
       tcFilterBtns.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
 
       tcCards.forEach((card) => {
         const cardModule = card.getAttribute("data-module");
-        if (moduleName === "all" || cardModule === moduleName) {
+        if (filterVal === "all" || cardModule === filterVal) {
           card.style.display = "";
         } else {
           card.style.display = "none";
