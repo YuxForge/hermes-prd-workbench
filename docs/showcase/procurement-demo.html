@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>青岚工坊 · 设备采购与审批原型</title>
+<style>
+:root{--g:#0e7a4f;--g2:#eaf6ef;--line:#dfe9e2;--ink:#1f2a24;--mut:#6b7c72;--red:#b42318;--amber:#b7791f;--blue:#1d5fa8}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f8f6;color:var(--ink);font-size:13px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;gap:10px;align-items:center}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--g);color:#fff;display:grid;place-items:center;font-weight:700}
+.brand b{font-size:14px}
+.brand small{display:block;color:var(--mut);font-size:11px;margin-top:2px}
+.tools{display:flex;align-items:center;gap:12px;color:var(--mut);font-size:12px}
+.wrap{display:flex;min-height:calc(100vh - 58px)}
+.side{width:186px;background:#fff;border-right:1px solid var(--line);padding:14px 10px;flex:0 0 186px}
+.side-h{font-size:11px;color:#9bb0a4;padding:0 12px 8px}
+.menu{padding:9px 12px;border-radius:8px;color:#3c4a42;cursor:pointer;margin-bottom:4px;display:flex;gap:8px;align-items:center}
+.menu span{font-size:11px;color:#9bb0a4}
+.menu:hover{background:#f2f8f4}
+.menu.on{background:var(--g2);color:var(--g);font-weight:600}
+.menu.on span{color:var(--g)}
+.side-note{margin-top:14px;padding:10px;border-top:1px dashed var(--line);color:#8b9a91;font-size:11px;line-height:1.6}
+.main{flex:1;padding:18px 20px;min-width:0}
+.view{display:none}
+.view.on{display:block}
+.vh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+h2{font-size:17px;margin:0 0 5px}
+.banner{margin:0;color:var(--mut);font-size:12px;line-height:1.5;max-width:760px}
+.btn{border:1px solid var(--g);background:var(--g);color:#fff;border-radius:7px;padding:7px 13px;font-size:12px;cursor:pointer;font-family:inherit}
+.btn:hover{opacity:.9}
+.btn.ghost{background:#fff;color:var(--g);border-color:#bcd9c8}
+.btn.sm{padding:4px 9px;font-size:12px;border-radius:6px}
+.btn.danger{background:#fff;color:var(--red);border-color:#e6bdb8}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid #eef3ef;white-space:nowrap}
+th{background:#f6faf7;font-size:12px;color:#52645a;font-weight:600}
+tbody tr:hover{background:#fafcfb}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;border:1px solid}
+.p-draft{color:#5d6b62;border-color:#d5ded9;background:#f6f9f7}
+.p-wait{color:var(--amber);border-color:#ecd9b4;background:#fdf7ea}
+.p-ok{color:var(--g);border-color:#bcdccb;background:#eef8f2}
+.p-rej{color:var(--red);border-color:#eec9c4;background:#fdf0ee}
+.p-blue{color:var(--blue);border-color:#c3d8ee;background:#f0f6fd}
+.p-part{color:#b45309;border-color:#f0d0a8;background:#fdf3e6}
+.muted{color:var(--mut);font-size:11px}
+.empty{text-align:center;color:#7c8c82;padding:26px}
+.dlg{display:none;position:fixed;inset:0;background:rgba(22,38,30,.38);z-index:50;align-items:center;justify-content:center;padding:16px}
+.dlg.on{display:flex}
+.box{background:#fff;border-radius:12px;width:min(780px,96vw);max-height:90vh;overflow:auto;box-shadow:0 16px 40px rgba(20,40,30,.22)}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2}
+.dh b{font-size:14px}
+.x{border:0;background:none;font-size:20px;line-height:1;color:#8b9a91;cursor:pointer}
+.db{padding:14px 16px}
+.df{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#fff;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+label{font-size:12px;color:#52645a;display:block}
+input,select,textarea{width:100%;margin-top:5px;padding:7px 9px;border:1px solid #d7e2db;border-radius:6px;font-size:13px;font-family:inherit;background:#fff;color:var(--ink)}
+input[readonly]{background:#f4f7f5;color:#5d6b62}
+textarea{min-height:64px;resize:vertical}
+.sub{font-size:12px;color:#52645a;margin:14px 0 8px;padding-top:10px;border-top:1px dashed var(--line)}
+table.mini input{margin-top:0;padding:5px 6px}
+table.mini th,table.mini td{padding:6px 5px;white-space:normal}
+.err{color:var(--red);font-size:12px;margin-top:10px;line-height:1.6;min-height:16px}
+.tl{border-left:2px solid #cfe3d7;padding:2px 0 10px 12px;font-size:12px}
+.tl b{font-size:12px}
+.dgrid{display:grid;grid-template-columns:110px 1fr 110px 1fr;gap:7px 10px;font-size:12px;padding:2px 0 10px}
+.dgrid dt{color:var(--mut)}
+.dgrid dd{margin:0}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#143d2c;color:#fff;padding:9px 16px;border-radius:8px;font-size:12px;opacity:0;pointer-events:none;transition:.2s;z-index:99;max-width:90vw}
+#toast.on{opacity:1}
+@media(max-width:760px){
+ .wrap{display:block}
+ .side{width:auto;display:flex;flex:initial;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}
+ .menu{white-space:nowrap;margin:0 4px 0 0}
+ .side-h,.side-note{display:none}
+ .main{padding:12px}
+ .grid2{grid-template-columns:1fr}
+ .dgrid{grid-template-columns:96px 1fr}
+}
+</style>
+</head>
+<body>
+<div class='top'>
+  <div class='brand'><div class='logo'>青</div><div><b>青岚工坊 · 设备采购与审批</b><small>合成演示数据 · 纯内存原型</small></div></div>
+  <div class='tools'><span>刷新后恢复种子数据</span><label style='display:flex;align-items:center;gap:6px'>当前角色
+    <select id='roleSel' style='width:auto;margin:0'>
+      <option>林沐</option><option>陈星</option><option>周禾</option><option>许原</option><option>方宁</option><option>苏青</option><option>白舟</option>
+    </select></label></div>
+</div>
+<div class='wrap'>
+  <aside class='side'>
+    <div class='side-h'>采购工作台</div>
+    <div class='menu on' data-view='apps'><span>01</span>采购申请</div>
+    <div class='menu' data-view='todo'><span>02</span>审批待办</div>
+    <div class='menu' data-view='orders'><span>03</span>采购订单</div>
+    <div class='menu' data-view='recv'><span>04</span>收货登记</div>
+    <div class='side-note'>原型不含付款、税额、库存、退货与撤销收货。角色切换仅演示界面规则，不代表正式认证与并发控制。</div>
+  </aside>
+  <main class='main'>
+    <section class='view on' id='v-apps'>
+      <div class='vh'><div><h2>采购申请</h2><p class='banner' id='bnApps'></p></div><div><button class='btn' data-act='newapp'>+ 新建申请</button></div></div>
+      <div class='card'><table>
+        <thead><tr><th>申请号</th><th>标题</th><th>申请人</th><th>部门</th><th class='num'>金额(元)</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+        <tbody id='tbApps'>
+          <tr><td>SQ20261019001</td><td>设计部工作站采购</td><td>林沐</td><td>设计部</td><td class='num'>8,600.00</td><td><span class='pill p-wait'>待财务复核</span></td><td>2026-10-19 09:20</td><td><button class='btn ghost sm' data-act='detail' data-kind='app' data-no='SQ20261019001'>详情</button></td></tr>
+          <tr><td>SQ20261019003</td><td>设计部显示器采购</td><td>林沐</td><td>设计部</td><td class='num'>4,500.00</td><td><span class='pill p-ok'>已批准</span></td><td>2026-10-18 14:00</td><td><button class='btn ghost sm' data-act='detail' data-kind='app' data-no='SQ20261019003'>详情</button></td></tr>
+          <tr><td>SQ20261019004</td><td>研发部工位改造</td><td>陈星</td><td>研发部</td><td class='num'>8,600.00</td><td><span class='pill p-rej'>已驳回</span></td><td>2026-10-17 09:00</td><td><button class='btn ghost sm' data-act='detail' data-kind='app' data-no='SQ20261019004'>详情</button></td></tr>
+          <tr><td>SQ20261019007</td><td>设计部工作站二期</td><td>林沐</td><td>设计部</td><td class='num'>8,600.00</td><td><span class='pill p-ok'>已批准</span></td><td>2026-10-16 10:20</td><td><button class='btn ghost sm' data-act='detail' data-kind='app' data-no='SQ20261019007'>详情</button></td></tr>
+        </tbody></table></div>
+    </section>
+    <section class='view' id='v-todo'>
+      <div class='vh'><div><h2>审批待办</h2><p class='banner' id='bnTodo'></p></div></div>
+      <div class='card'><table>
+        <thead><tr><th>申请号</th><th>标题</th><th>申请人</th><th>部门</th><th class='num'>金额(元)</th><th>当前节点</th><th>轮次</th><th>操作</th></tr></thead>
+        <tbody id='tbTodo'>
+          <tr><td>SQ20261019002</td><td>研发部扩展坞采购</td><td>陈星</td><td>研发部</td><td class='num'>4,500.00</td><td><span class='pill p-wait'>待主管审批</span></td><td>第1轮</td><td><button class='btn ghost sm' data-act='approve' data-no='SQ20261019002'>审核</button></td></tr>
+          <tr><td>SQ20261019001</td><td>设计部工作站采购</td><td>林沐</td><td>设计部</td><td class='num'>8,600.00</td><td><span class='pill p-wait'>待财务复核</span></td><td>第1轮</td><td><button class='btn ghost sm' data-act='approve' data-no='SQ20261019001'>审核</button></td></tr>
+        </tbody></table></div>
+    </section>
+    <section class='view' id='v-orders'>
+      <div class='vh'><div><h2>采购订单</h2><p class='banner' id='bnOrders'></p></div></div>
+      <div class='card'><table>
+        <thead><tr><th>订单号</th><th>关联申请</th><th>供应商</th><th class='num'>金额(元)</th><th>状态</th><th>预计到货</th><th>收货进度</th><th>操作</th></tr></thead>
+        <tbody id='tbOrders'>
+          <tr><td>ORD20261018001</td><td>SQ20261019005</td><td>深圳岚屏科技有限公司</td><td class='num'>3,600.00</td><td><span class='pill p-blue'>待收货</span></td><td>2026-10-24</td><td>0/2</td><td><button class='btn ghost sm' data-act='detail' data-kind='order' data-no='ORD20261018001'>详情</button></td></tr>
+          <tr><td>ORD20261017001</td><td>SQ20261019006</td><td>东莞联拓外设有限公司</td><td class='num'>900.00</td><td><span class='pill p-part'>部分收货</span></td><td>2026-10-22</td><td>1/2</td><td><button class='btn ghost sm' data-act='detail' data-kind='order' data-no='ORD20261017001'>详情</button></td></tr>
+          <tr><td>ORD20261016001</td><td>SQ20261019007</td><td>深圳岚屏科技有限公司</td><td class='num'>8,600.00</td><td><span class='pill p-ok'>已完成</span></td><td>2026-10-20</td><td>1/1</td><td><button class='btn ghost sm' data-act='detail' data-kind='order' data-no='ORD20261016001'>详情</button></td></tr>
+        </tbody></table></div>
+    </section>
+    <section class='view' id='v-recv'>
+      <div class='vh'><div><h2>收货登记</h2><p class='banner' id='bnRecv'></p></div></div>
+      <div class='card'><table>
+        <thead><tr><th>订单号</th><th>关联申请</th><th>供应商</th><th>订购/已收</th><th>状态</th><th>最近登记</th><th>操作</th></tr></thead>
+        <tbody id='tbRecv'>
+          <tr><td>ORD20261018001</td><td>SQ20261019005</td><td>深圳岚屏科技有限公司</td><td>0/2</td><td><span class='pill p-blue'>待收货</span></td><td>—</td><td><span class='muted'>仅白舟可登记</span></td></tr>
+          <tr><td>ORD20261017001</td><td>SQ20261019006</td><td>东莞联拓外设有限公司</td><td>1/2</td><td><span class='pill p-part'>部分收货</span></td><td>2026-10-18 15:40</td><td><span class='muted'>仅白舟可登记</span></td></tr>
+          <tr><td>ORD20261016001</td><td>SQ20261019007</td><td>深圳岚屏科技有限公司</td><td>1/1</td><td><span class='pill p-ok'>已完成</span></td><td>2026-10-18 10:10</td><td><span class='muted'>已完成</span></td></tr>
+        </tbody></table></div>
+    </section>
+  </main>
+</div>
+
+<div class='dlg' id='dlgApp'><div class='box'>
+  <div class='dh'><b id='fHead'>新建采购申请</b><button class='x' data-act='close' data-dlg='dlgApp'>×</button></div>
+  <div class='db'>
+    <div class='grid2'>
+      <label>申请标题<input id='fTitle' maxlength='100' placeholder='如：设计部显示器采购'></label>
+      <label>部门<input id='fDept' readonly></label>
+      <label>期望到货日<input id='fExpect' type='date'></label>
+      <label>用途<input id='fPurpose' maxlength='500' placeholder='说明采购用途与使用场景'></label>
+    </div>
+    <div class='sub'>物品明细（第一行必填；第二行可留空。数量 1–999 整数，单价最多两位小数）</div>
+    <table class='mini'><thead><tr><th>名称</th><th>规格</th><th>单位</th><th>数量</th><th>单价(元)</th></tr></thead><tbody>
+      <tr><td><input id='n1'></td><td><input id='s1'></td><td><select id='u1'><option>台</option><option>个</option><option>件</option></select></td><td><input id='q1' type='number' min='1' max='999'></td><td><input id='p1' type='number' step='0.01' min='0'></td></tr>
+      <tr><td><input id='n2'></td><td><input id='s2'></td><td><select id='u2'><option>台</option><option>个</option><option>件</option></select></td><td><input id='q2' type='number' min='1' max='999'></td><td><input id='p2' type='number' step='0.01' min='0'></td></tr>
+    </tbody></table>
+    <div class='err' id='fErr'></div>
+  </div>
+  <div class='df'><span class='muted'>保存草稿只校验已填格式；提交审批执行全量必填校验并进入待主管审批</span><div><button class='btn ghost' data-act='saveDraft'>保存草稿</button><button class='btn' data-act='saveSubmit'>提交审批</button></div></div>
+</div></div>
+
+<div class='dlg' id='dlgApr'><div class='box' style='width:min(620px,96vw)'>
+  <div class='dh'><b>审批审核</b><button class='x' data-act='close' data-dlg='dlgApr'>×</button></div>
+  <div class='db'><div id='aprInfo' style='font-size:12px;line-height:1.8'></div>
+    <label style='margin-top:10px'>审批意见（驳回必填，1–200 字）<textarea id='aprReason' maxlength='200'></textarea></label>
+    <div class='err' id='aprErr'></div>
+    <p class='muted' style='margin:8px 0 0'>通过或驳回都会写入只读审批记录。金额 ≤5,000.00 元主管通过即批准；&gt;5,000.00 元需财务复核。</p>
+  </div>
+  <div class='df'><span class='muted'>当前操作人：<b id='aprWho'></b></span><div><button class='btn danger' data-act='okRej'>驳回</button><button class='btn' data-act='okApr'>通过</button></div></div>
+</div></div>
+
+<div class='dlg' id='dlgOrd'><div class='box' style='width:min(560px,96vw)'>
+  <div class='dh'><b>订单下单</b><button class='x' data-act='close' data-dlg='dlgOrd'>×</button></div>
+  <div class='db'><div id='ordInfo' style='font-size:12px;line-height:1.8;margin-bottom:10px'></div>
+    <label>供应商（必填，1–100 字）<input id='ordSup' maxlength='100' placeholder='如：深圳岚屏科技有限公司'></label>
+    <label style='margin-top:10px'>预计到货日（不早于 2026-10-19）<input id='ordExp' type='date' min='2026-10-19'></label>
+    <div class='err' id='ordErr'></div>
+  </div>
+  <div class='df'><span class='muted'>物品、数量、单价来自批准版本快照，不可修改</span><div><button class='btn' data-act='okOrder'>确认下单</button></div></div>
+</div></div>
+
+<div class='dlg' id='dlgRecv'><div class='box'>
+  <div class='dh'><b>收货登记</b><button class='x' data-act='close' data-dlg='dlgRecv'>×</button></div>
+  <div class='db'>
+    <div id='rcInfo' style='font-size:12px;line-height:1.8;margin-bottom:8px'></div>
+    <table class='mini'><thead><tr><th>物品</th><th>规格</th><th>订购</th><th>已收</th><th>待收</th><th>本次收货</th></tr></thead><tbody id='rcLines'></tbody></table>
+    <div class='err' id='rcErr'></div>
+    <p class='muted' style='margin:8px 0 0'>可只收部分行；任一行未收齐为部分收货，全部收齐才已完成。提交后累计量不可撤销。</p>
+  </div>
+  <div class='df'><span class='muted'>登记人：<b id='rcWho'></b></span><div><button class='btn' data-act='okRecv'>确认收货</button></div></div>
+</div></div>
+
+<div class='dlg' id='dlgDetail'><div class='box'>
+  <div class='dh'><b id='dtHead'>单据详情</b><button class='x' data-act='close' data-dlg='dlgDetail'>×</button></div>
+  <div class='db' id='dtBody'></div>
+  <div class='df'><span class='muted'>详情为只读；时间线按操作先后保留</span><div><button class='btn ghost' data-act='close' data-dlg='dlgDetail'>关闭</button></div></div>
+</div></div>
+
+<div id='toast'></div>
+
+<script>
+var TODAY='2026-10-19';
+var PERSON={
+ '林沐':{dept:'设计部',title:'申请人'},
+ '陈星':{dept:'研发部',title:'申请人'},
+ '周禾':{dept:'设计部',title:'设计主管'},
+ '许原':{dept:'研发部',title:'研发主管'},
+ '方宁':{dept:'财务部',title:'财务复核员'},
+ '苏青':{dept:'采购部',title:'采购员'},
+ '白舟':{dept:'仓储部',title:'仓管'}
+};
+var state={
+ role:'林沐',seq:8,oseq:4,shseq:1,editNo:null,aprNo:null,ordNo:null,recvNo:null,
+ apps:[
+  {no:'SQ20261019001',title:'设计部工作站采购',purpose:'设计部新入职设计师工作站配置',dept:'设计部',user:'林沐',total:8600,status:'待财务复核',created:'2026-10-19 09:20',expect:'2026-10-28',round:1,ver:1,order:null,
+   items:[{name:'图形工作站',spec:'i7/32G/1T',unit:'台',qty:1,price:8600}],
+   hist:[{r:1,who:'周禾（设计主管）',act:'主管通过',reason:'预算内，同意',time:'2026-10-19 10:05'}]},
+  {no:'SQ20261019002',title:'研发部扩展坞采购',purpose:'研发工位外设补充',dept:'研发部',user:'陈星',total:4500,status:'待主管审批',created:'2026-10-19 11:10',expect:'2026-10-30',round:1,ver:1,order:null,
+   items:[{name:'扩展坞',spec:'Type-C 12合1',unit:'个',qty:2,price:450},{name:'显示器',spec:'27寸 2K',unit:'台',qty:2,price:1800}],
+   hist:[]},
+  {no:'SQ20261019003',title:'设计部显示器采购',purpose:'设计工位显示器更换',dept:'设计部',user:'林沐',total:4500,status:'已批准',created:'2026-10-18 14:00',expect:'2026-10-27',round:1,ver:1,order:null,
+   items:[{name:'显示器',spec:'27寸 2K',unit:'台',qty:2,price:1800},{name:'扩展坞',spec:'Type-C 12合1',unit:'个',qty:2,price:450}],
+   hist:[{r:1,who:'周禾（设计主管）',act:'主管通过',reason:'同意',time:'2026-10-18 15:20'}]},
+  {no:'SQ20261019004',title:'研发部工位改造',purpose:'研发区工位调整',dept:'研发部',user:'陈星',total:8600,status:'已驳回',created:'2026-10-17 09:00',expect:'2026-10-31',round:1,ver:1,order:null,
+   items:[{name:'图形工作站',spec:'i7/32G/1T',unit:'台',qty:1,price:8600}],
+   hist:[{r:1,who:'许原（研发主管）',act:'主管驳回',reason:'本季度设备预算已用完，请下季度重提',time:'2026-10-17 10:30'}]},
+  {no:'SQ20261019005',title:'研发部显示器采购',purpose:'测试工位显示设备补充',dept:'研发部',user:'陈星',total:3600,status:'已批准',created:'2026-10-16 16:00',expect:'2026-10-24',round:1,ver:1,order:'ORD20261018001',
+   items:[{name:'显示器',spec:'27寸 2K',unit:'台',qty:2,price:1800}],
+   hist:[{r:1,who:'许原（研发主管）',act:'主管通过',reason:'同意',time:'2026-10-16 17:10'}]},
+  {no:'SQ20261019006',title:'研发部扩展坞补充',purpose:'测试机台外设补充',dept:'研发部',user:'陈星',total:900,status:'已批准',created:'2026-10-15 09:30',expect:'2026-10-22',round:1,ver:1,order:'ORD20261017001',
+   items:[{name:'扩展坞',spec:'Type-C 12合1',unit:'个',qty:2,price:450}],
+   hist:[{r:1,who:'许原（研发主管）',act:'主管通过',reason:'同意',time:'2026-10-15 10:10'}]},
+  {no:'SQ20261019007',title:'设计部工作站二期',purpose:'渲染工位工作站补充',dept:'设计部',user:'林沐',total:8600,status:'已批准',created:'2026-10-16 10:20',expect:'2026-10-20',round:1,ver:1,order:'ORD20261016001',
+   items:[{name:'图形工作站',spec:'i7/32G/1T',unit:'台',qty:1,price:8600}],
+   hist:[{r:1,who:'周禾（设计主管）',act:'主管通过',reason:'渲染任务急需',time:'2026-10-16 11:00'}]}
+ ],
+ orders:[
+  {no:'ORD20261018001',app:'SQ20261019005',supplier:'深圳岚屏科技有限公司',amount:3600,status:'待收货',created:'2026-10-18 09:00',expect:'2026-10-24',
+   items:[{name:'显示器',spec:'27寸 2K',unit:'台',qty:2,price:1800}],got:[0],recs:[]},
+  {no:'ORD20261017001',app:'SQ20261019006',supplier:'东莞联拓外设有限公司',amount:900,status:'部分收货',created:'2026-10-17 09:20',expect:'2026-10-22',
+   items:[{name:'扩展坞',spec:'Type-C 12合1',unit:'个',qty:2,price:450}],got:[1],
+   recs:[{no:'SH20261018001',who:'白舟',time:'2026-10-18 15:40',lines:'扩展坞 ×1',note:'首批到货'}]},
+  {no:'ORD20261016001',app:'SQ20261019007',supplier:'深圳岚屏科技有限公司',amount:8600,status:'已完成',created:'2026-10-16 13:00',expect:'2026-10-20',
+   items:[{name:'图形工作站',spec:'i7/32G/1T',unit:'台',qty:1,price:8600}],got:[1],
+   recs:[{no:'SH20261017001',who:'白舟',time:'2026-10-18 10:10',lines:'图形工作站 ×1',note:'验收合格'}]}
+ ]
+};
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function money(n){var s=Number(n).toFixed(2).split('.');var i=s[0],out='',c=0;for(var k=i.length-1;k>=0;k--){out=i[k]+out;c++;if(c%3===0&&k>0)out=','+out;}return out+'.'+s[1];}
+function now(){var d=new Date();function p(x){return x<10?'0'+x:''+x;}return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());}
+function findApp(no){for(var i=0;i<state.apps.length;i++){if(state.apps[i].no===no)return state.apps[i];}return null;}
+function findOrder(no){for(var i=0;i<state.orders.length;i++){if(state.orders[i].no===no)return state.orders[i];}return null;}
+function pad3(n){return ('00'+n).slice(-3);}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(window._tt);window._tt=setTimeout(function(){t.classList.remove('on');},2400);}
+function openDlg(id){document.getElementById(id).classList.add('on');}
+function closeDlg(id){document.getElementById(id).classList.remove('on');}
+function sumQty(o){var q=0;o.items.forEach(function(it){q+=it.qty;});return q;}
+function sumGot(o){var g=0;o.got.forEach(function(v){g+=v;});return g;}
+
+function canSeeApp(a){
+ var r=state.role;
+ if(r==='林沐'||r==='陈星')return a.user===r;
+ if(r==='周禾'||r==='许原')return a.dept===PERSON[r].dept;
+ if(r==='方宁')return a.status==='待财务复核'||a.user===r;
+ if(r==='苏青')return a.status==='已批准';
+ if(r==='白舟')return !!a.order;
+ return false;
+}
+function isSupervisor(){return state.role==='周禾'||state.role==='许原';}
+function todoList(){
+ var r=state.role,list=[];
+ if(isSupervisor()){
+  var other=r==='周禾'?'许原':'周禾';
+  list=state.apps.filter(function(a){
+   if(a.status!=='待主管审批')return false;
+   if(a.user===r)return false;
+   return a.dept===PERSON[r].dept||a.user===other;
+  });
+ }else if(r==='方宁'){
+  list=state.apps.filter(function(a){return a.status==='待财务复核'&&a.user!==r;});
+ }
+ return list;
+}
+function canSeeOrder(o){
+ var a=findApp(o.app),r=state.role;
+ if(r==='苏青'||r==='白舟')return true;
+ if(r==='方宁')return false;
+ if(!a)return false;
+ if(r==='林沐'||r==='陈星')return a.user===r;
+ return a.dept===PERSON[r].dept;
+}
+
+function pill(s){
+ var m={'草稿':'p-draft','待主管审批':'p-wait','待财务复核':'p-wait','已批准':'p-ok','已驳回':'p-rej','待下单':'p-draft','待收货':'p-blue','部分收货':'p-part','已完成':'p-ok'};
+ return '<span class="pill '+(m[s]||'p-draft')+'">'+s+'</span>';
+}
+
+function renderApps(){
+ var list=state.apps.filter(canSeeApp);
+ var html=list.map(function(a){
+  var acts='<button class="btn ghost sm" data-act="detail" data-kind="app" data-no="'+a.no+'">详情</button>';
+  if((state.role==='林沐'||state.role==='陈星')&&a.user===state.role&&(a.status==='草稿'||a.status==='已驳回')){
+   acts+=' <button class="btn ghost sm" data-act="edit" data-no="'+a.no+'">'+(a.status==='已驳回'?'修改重提':'编辑草稿')+'</button>';
+  }
+  if((state.role==='林沐'||state.role==='陈星')&&a.user===state.role&&a.status==='草稿'){
+   acts+=' <button class="btn sm" data-act="submit" data-no="'+a.no+'">提交审批</button>';
+  }
+  if(state.role==='苏青'&&a.status==='已批准'&&!a.order){
+   acts+=' <button class="btn sm" data-act="build" data-no="'+a.no+'">建单</button>';
+  }
+  if(state.role==='苏青'&&a.order){acts+=' <span class="muted">已建单</span>';}
+  return '<tr><td>'+a.no+'</td><td>'+esc(a.title)+'</td><td>'+esc(a.user)+'</td><td>'+esc(a.dept)+'</td><td class="num">'+money(a.total)+'</td><td>'+pill(a.status)+'</td><td>'+a.created+'</td><td>'+acts+'</td></tr>';
+ }).join('');
+ if(!html)html='<tr><td colspan="8" class="empty">暂无匹配单据</td></tr>';
+ document.getElementById('tbApps').innerHTML=html;
+ document.getElementById('bnApps').textContent=bannerApps();
+}
+
+function renderTodo(){
+ var list=todoList();
+ var html=list.map(function(a){
+  var node=a.status==='待财务复核'?'待财务复核':'待主管审批';
+  return '<tr><td>'+a.no+'</td><td>'+esc(a.title)+'</td><td>'+esc(a.user)+'</td><td>'+esc(a.dept)+'</td><td class="num">'+money(a.total)+'</td><td>'+pill(node)+'</td><td>第'+a.round+'轮</td><td><button class="btn sm" data-act="approve" data-no="'+a.no+'">审核</button></td></tr>';
+ }).join('');
+ if(!html){
+  var msg='当前角色（'+state.role+'）暂无审批待办，可切换为周禾、许原或方宁演示审批。';
+  if(state.role==='林沐'||state.role==='陈星')msg='申请人无审批权限，可切换为周禾、许原或方宁查看待办。';
+  if(state.role==='苏青'||state.role==='白舟')msg='采购与仓管不参与审批，待办为空。';
+  html='<tr><td colspan="8" class="empty">'+msg+'</td></tr>';
+ }
+ document.getElementById('tbTodo').innerHTML=html;
+ document.getElementById('bnTodo').textContent=bannerTodo();
+}
+
+function renderOrders(){
+ var list=state.orders.filter(canSeeOrder);
+ var html=list.map(function(o){
+  var acts='<button class="btn ghost sm" data-act="detail" data-kind="order" data-no="'+o.no+'">详情</button>';
+  if(state.role==='苏青'&&o.status==='待下单')acts+=' <button class="btn sm" data-act="order" data-no="'+o.no+'">下单</button>';
+  if(state.role==='白舟'&&(o.status==='待收货'||o.status==='部分收货'))acts+=' <button class="btn sm" data-act="receive" data-no="'+o.no+'">收货</button>';
+  return '<tr><td>'+o.no+'</td><td>'+o.app+'</td><td>'+esc(o.supplier||'—')+'</td><td class="num">'+money(o.amount)+'</td><td>'+pill(o.status)+'</td><td>'+(o.expect||'—')+'</td><td>'+sumGot(o)+'/'+sumQty(o)+'</td><td>'+acts+'</td></tr>';
+ }).join('');
+ if(!html)html='<tr><td colspan="8" class="empty">'+bannerOrders()+'</td></tr>';
+ document.getElementById('tbOrders').innerHTML=html;
+ document.getElementById('bnOrders').textContent=bannerOrders();
+}
+
+function renderRecv(){
+ var list=state.orders.filter(canSeeOrder).filter(function(o){return o.status!=='待下单';});
+ var html=list.map(function(o){
+  var last=o.recs.length?o.recs[o.recs.length-1].time:'—';
+  var acts='<span class="muted">已完成</span>';
+  if(state.role==='白舟'&&(o.status==='待收货'||o.status==='部分收货'))acts='<button class="btn sm" data-act="receive" data-no="'+o.no+'">登记收货</button>';
+  else if(o.status!=='已完成')acts='<span class="muted">仅白舟可登记</span>';
+  return '<tr><td>'+o.no+'</td><td>'+o.app+'</td><td>'+esc(o.supplier||'—')+'</td><td>'+sumGot(o)+'/'+sumQty(o)+'</td><td>'+pill(o.status)+'</td><td>'+last+'</td><td>'+acts+'</td></tr>';
+ }).join('');
+ if(!html)html='<tr><td colspan="7" class="empty">'+bannerRecv()+'</td></tr>';
+ document.getElementById('tbRecv').innerHTML=html;
+ document.getElementById('bnRecv').textContent=bannerRecv();
+}
+
+function bannerApps(){
+ var r=state.role,t=PERSON[r].title;
+ if(r==='林沐'||r==='陈星')return '当前：'+r+'（'+t+'）· 仅本人申请；可建草稿、修改驳回单、提交审批，不能审批。';
+ if(isSupervisor())return '当前：'+r+'（'+t+'）· 本部门申请只读；在「审批待办」处理本部门单据，不得审批本人申请。';
+ if(r==='方宁')return '当前：方宁（财务复核员）· 仅查看待财务复核单据；不可查看订单与收货，本人申请不可提交。';
+ if(r==='苏青')return '当前：苏青（采购员）· 仅查看已批准申请，可建单/下单，不可修改申请或登记收货。';
+ return '当前：白舟（仓管）· 仅查看已建单申请的必要信息，收货操作请到「收货登记」。';
+}
+function bannerTodo(){
+ var r=state.role;
+ if(isSupervisor())return '当前：'+r+'（'+PERSON[r].title+'）· 待主管审批。≤5,000.00 元通过即批准；>5,000.00 元转财务复核；本人申请不可自审。';
+ if(r==='方宁')return '当前：方宁（财务复核员）· 跨部门待财务复核。通过后才允许建单，驳回必须填写理由。';
+ if(r==='林沐'||r==='陈星')return '当前：'+r+'（申请人）· 无审批权限，审批待办为空。';
+ return '当前：'+r+'（'+PERSON[r].title+'）· 无审批职责，待办为空。';
+}
+function bannerOrders(){
+ var r=state.role;
+ if(r==='苏青')return '当前：苏青（采购员）· 建单后为待下单；填写供应商与预计到货日完成下单，之后由仓管收货。';
+ if(r==='白舟')return '当前：白舟（仓管）· 订单只读，收货请在「收货登记」完成。';
+ if(r==='方宁')return '当前：方宁（财务复核员）· 不可查看订单与收货记录。';
+ return '当前：'+r+'（'+PERSON[r].title+'）· 仅展示本人/本部门申请关联的订单，只读。';
+}
+function bannerRecv(){
+ if(state.role==='白舟')return '当前：白舟（仓管）· 仅待收货/部分收货订单可登记；本次数量不得超过待收量，超收将被拦截。';
+ return '当前：'+state.role+'（'+PERSON[state.role].title+'）· 只读；仅白舟可登记收货。';
+}
+
+function renderAll(){renderApps();renderTodo();renderOrders();renderRecv();}
+
+function openForm(no){
+ state.editNo=no;
+ var a=no?findApp(no):null;
+ document.getElementById('fHead').textContent=a?('修改申请 '+a.no):'新建采购申请';
+ document.getElementById('fDept').value=PERSON[state.role].dept;
+ document.getElementById('fTitle').value=a?a.title:'';
+ document.getElementById('fPurpose').value=a?a.purpose:'';
+ document.getElementById('fExpect').value=a?a.expect:'';
+ ['1','2'].forEach(function(k){
+  var it=a&&a.items[Number(k)-1];
+  document.getElementById('n'+k).value=it?it.name:'';
+  document.getElementById('s'+k).value=it?it.spec:'';
+  document.getElementById('u'+k).value=it?it.unit:'台';
+  document.getElementById('q'+k).value=it?it.qty:'';
+  document.getElementById('p'+k).value=it?it.price:'';
+ });
+ document.getElementById('fErr').textContent='';
+ openDlg('dlgApp');
+}
+
+function saveForm(isSubmit){
+ var errs=[];
+ var title=document.getElementById('fTitle').value.trim();
+ var purpose=document.getElementById('fPurpose').value.trim();
+ var expect=document.getElementById('fExpect').value;
+ if(isSubmit&&!title)errs.push('申请标题必填');
+ if(isSubmit&&!purpose)errs.push('用途必填');
+ if(isSubmit&&!expect)errs.push('期望到货日必填');
+ if(expect&&expect<TODAY)errs.push('期望到货日不得早于今天');
+ var items=[];
+ ['1','2'].forEach(function(k){
+  var name=document.getElementById('n'+k).value.trim();
+  var spec=document.getElementById('s'+k).value.trim();
+  var unit=document.getElementById('u'+k).value;
+  var qs=document.getElementById('q'+k).value;
+  var ps=document.getElementById('p'+k).value;
+  if(!name&&!spec&&!qs&&ps==='')return;
+  if(!name)errs.push('第'+k+'行物品名称必填');
+  if(name.length>100)errs.push('第'+k+'行名称最多100字');
+  if(spec.length>100)errs.push('第'+k+'行规格最多100字');
+  var q=Number(qs),p=Number(ps);
+  if(qs===''||!isFinite(q)||Math.floor(q)!==q||q<1||q>999)errs.push('第'+k+'行数量须为 1–999 的整数');
+  if(ps===''||!isFinite(p)||p<0||p>999999.99){errs.push('第'+k+'行单价须在 0–999999.99 之间');}
+  else if(Math.abs(Math.round(p*100)-p*100)>1e-6){errs.push('第'+k+'行单价最多两位小数');}
+  items.push({name:name,spec:spec,unit:unit,qty:q,price:p});
+ });
+ if(isSubmit&&items.length===0)errs.push('请至少填写一行完整物品明细');
+ if(state.role==='方宁'&&isSubmit)errs.push('财务复核员本人申请不可提交，请联系管理员安排复核人');
+ if(errs.length){document.getElementById('fErr').textContent=errs.join('；');return;}
+ var total=0;
+ items.forEach(function(it){total+=Math.round(it.price*100)*it.qty;});
+ total=total/100;
+ if(state.editNo){
+  var a=findApp(state.editNo);
+  a.title=title;a.purpose=purpose;a.expect=expect;a.items=items;a.total=total;a.ver=a.ver+1;
+  if(isSubmit){
+   if(a.status==='已驳回'){a.round=a.round+1;}
+   a.status='待主管审批';
+   a.hist.push({r:a.round,who:state.role+'（'+PERSON[state.role].title+'）',act:'修改后重新提交',reason:'版本 V'+a.ver+'，从主管重新审批',time:now()});
+  }else{a.status='草稿';}
+  closeDlg('dlgApp');renderAll();
+  toast(isSubmit?'已重新提交 '+a.no+'（第'+a.round+'轮）':'草稿已保存');
+ }else{
+  var no='SQ20261019'+pad3(state.seq++);
+  state.apps.unshift({no:no,title:title,purpose:purpose,dept:PERSON[state.role].dept,user:state.role,total:total,status:isSubmit?'待主管审批':'草稿',created:now(),expect:expect,round:1,ver:1,order:null,items:items,hist:isSubmit?[{r:1,who:state.role+'（'+PERSON[state.role].title+'）',act:'提交审批',reason:'首次提交',time:now()}]:[]});
+  closeDlg('dlgApp');renderAll();
+  toast(isSubmit?'已提交 '+no+'，进入待主管审批':'草稿已保存 '+no);
+ }
+ state.editNo=null;
+}
+
+function doSubmit(no){
+ var a=findApp(no);
+ if(!a)return;
+ var miss=[];
+ if(!a.title)miss.push('标题');
+ if(!a.purpose)miss.push('用途');
+ if(!a.expect)miss.push('期望到货日');
+ if(!a.items.length)miss.push('物品明细');
+ if(miss.length){toast('无法提交，缺少：'+miss.join('、'));return;}
+ if(a.expect<TODAY){toast('期望到货日不得早于今天，请先修改');return;}
+ a.status='待主管审批';a.ver=a.ver+1;
+ a.hist.push({r:a.round,who:a.user+'（申请人）',act:'提交审批',reason:'版本 V'+a.ver,time:now()});
+ renderAll();toast('已提交 '+a.no+'，等待主管审批');
+}
+
+function doBuild(no){
+ var a=findApp(no);
+ if(!a)return;
+ if(a.order){toast('该申请已有订单 '+a.order+'，不能重复建单');return;}
+ if(a.status!=='已批准'){toast('仅已批准申请可以建单');return;}
+ var o={no:'ORD20261019'+pad3(state.oseq++),app:a.no,supplier:'',amount:a.total,status:'待下单',created:now(),expect:'',items:JSON.parse(JSON.stringify(a.items)),got:a.items.map(function(){return 0;}),recs:[]};
+ state.orders.unshift(o);a.order=o.no;
+ renderAll();toast('已建单 '+o.no+'（待下单），请在采购订单完成下单');
+}
+
+function openOrder(no){
+ var o=findOrder(no);
+ if(!o)return;
+ state.ordNo=no;
+ document.getElementById('ordInfo').textContent='订单 '+o.no+' · 关联申请 '+o.app+' · 金额 '+money(o.amount)+' 元';
+ document.getElementById('ordSup').value=o.supplier||'';
+ document.getElementById('ordExp').value=o.expect||'';
+ document.getElementById('ordErr').textContent='';
+ openDlg('dlgOrd');
+}
+
+function confirmOrder(){
+ var o=findOrder(state.ordNo);
+ if(!o)return;
+ var sup=document.getElementById('ordSup').value.trim();
+ var exp=document.getElementById('ordExp').value;
+ var errs=[];
+ if(!sup)errs.push('供应商必填');
+ if(sup.length>100)errs.push('供应商最多100字');
+ if(!exp)errs.push('预计到货日必填');
+ if(exp&&exp<TODAY)errs.push('预计到货日不得早于下单日');
+ if(errs.length){document.getElementById('ordErr').textContent=errs.join('；');return;}
+ o.supplier=sup;o.expect=exp;o.status='待收货';
+ closeDlg('dlgOrd');renderAll();toast('下单成功，'+o.no+' 进入待收货');
+}
+
+function openApr(no){
+ var a=findApp(no);
+ if(!a)return;
+ state.aprNo=no;
+ var lines=a.items.map(function(it){return esc(it.name)+' ×'+it.qty+it.unit+'（'+money(it.price)+' 元）';}).join('；');
+ document.getElementById('aprInfo').innerHTML='<div><b>'+esc(a.title)+'</b>（'+a.no+'）</div><div class="muted">申请人 '+esc(a.user)+' · '+esc(a.dept)+' · 第'+a.round+'轮 · 当前 '+a.status+'</div><div>用途：'+esc(a.purpose||'—')+'</div><div>明细：'+lines+'</div><div style="margin-top:6px">合计：<b style="font-size:16px;color:#0e7a4f">'+money(a.total)+' 元</b> '+(a.total<=5000?'<span class="muted">（≤5,000.00，主管通过即批准）</span>':'<span class="muted">（&gt;5,000.00，需财务复核）</span>')+'</div>';
+ document.getElementById('aprReason').value='';
+ document.getElementById('aprErr').textContent='';
+ document.getElementById('aprWho').textContent=state.role+'（'+PERSON[state.role].title+'）';
+ openDlg('dlgApr');
+}
+
+function confirmApr(pass){
+ var a=findApp(state.aprNo);
+ if(!a)return;
+ if(a.user===state.role){document.getElementById('aprErr').textContent='不可审批本人申请';return;}
+ var reason=document.getElementById('aprReason').value.trim();
+ if(!pass&&!reason){document.getElementById('aprErr').textContent='驳回必须填写理由（1–200 字）';return;}
+ if(reason.length>200){document.getElementById('aprErr').textContent='审批意见最多200字';return;}
+ var who=state.role+'（'+PERSON[state.role].title+'）',act='';
+ if(a.status==='待主管审批'){
+  if(pass){a.status=a.total<=5000?'已批准':'待财务复核';act='主管通过';}
+  else{a.status='已驳回';act='主管驳回';}
+ }else if(a.status==='待财务复核'){
+  if(pass){a.status='已批准';act='财务通过';}
+  else{a.status='已驳回';act='财务驳回';}
+ }else{document.getElementById('aprErr').textContent='该单据当前不可审批';return;}
+ a.hist.push({r:a.round,who:who,act:act,reason:reason||'同意',time:now()});
+ closeDlg('dlgApr');renderAll();
+ toast(act+'：'+a.no+' → '+a.status);
+}
+
+function openRecv(no){
+ var o=findOrder(no);
+ if(!o)return;
+ state.recvNo=no;
+ var lines='';
+ o.items.forEach(function(it,i){
+  var remain=it.qty-o.got[i];
+  lines+='<tr><td>'+esc(it.name)+'</td><td>'+esc(it.spec||'—')+'</td><td>'+it.qty+'</td><td>'+o.got[i]+'</td><td>'+remain+'</td><td><input type="number" min="0" max="'+remain+'" id="rc'+i+'" placeholder="0"></td></tr>';
+ });
+ document.getElementById('rcLines').innerHTML=lines;
+ document.getElementById('rcInfo').innerHTML='订单 '+o.no+' · 关联申请 '+o.app+' · 供应商 '+esc(o.supplier||'—')+' · 当前 '+o.status;
+ document.getElementById('rcErr').textContent='';
+ document.getElementById('rcWho').textContent=state.role;
+ openDlg('dlgRecv');
+}
+
+function confirmRecv(){
+ var o=findOrder(state.recvNo);
+ if(!o)return;
+ var errs=[],vals=[],any=0;
+ o.items.forEach(function(it,i){
+  var s=document.getElementById('rc'+i).value;
+  var v=s===''?0:Number(s);
+  if(s!==''&&(!isFinite(v)||Math.floor(v)!==v))errs.push(esc(it.name)+' 本次数量须为整数');
+  if(v<0)errs.push(esc(it.name)+' 本次数量不得为负');
+  var remain=it.qty-o.got[i];
+  if(v>remain)errs.push('超收：'+esc(it.name)+' 本次 '+v+' 超过待收 '+remain);
+  vals.push(v);any+=v;
+ });
+ if(errs.length){document.getElementById('rcErr').innerHTML=errs.join('<br>');return;}
+ if(any===0){document.getElementById('rcErr').textContent='请至少填写一行本次收货数量';return;}
+ var parts=[];
+ o.items.forEach(function(it,i){o.got[i]+=vals[i];if(vals[i]>0)parts.push(it.name+' ×'+vals[i]);});
+ var done=o.items.every(function(it,i){return o.got[i]===it.qty;});
+ o.status=done?'已完成':'部分收货';
+ o.recs.push({no:'SH20261019'+pad3(state.shseq++),who:state.role,time:now(),lines:parts.join('、'),note:''});
+ closeDlg('dlgRecv');renderAll();
+ toast('收货已登记：'+parts.join('、')+'；订单状态 '+o.status);
+}
+
+function openDetail(no,kind){
+ if(kind==='order'){
+  var o=findOrder(no);
+  if(!o)return;
+  var rows=o.items.map(function(it,i){return '<tr><td>'+esc(it.name)+'</td><td>'+esc(it.spec||'—')+'</td><td>'+it.qty+it.unit+'</td><td class="num">'+money(it.price)+'</td><td>'+o.got[i]+'</td></tr>';}).join('');
+  var recs=o.recs.map(function(r){return '<div class="tl"><b>'+esc(r.lines)+'</b><div class="muted">'+esc(r.no)+' · '+esc(r.who)+' · '+r.time+'</div></div>';}).join('')||'<p class="muted">暂无收货记录</p>';
+  document.getElementById('dtHead').textContent='订单详情 '+o.no;
+  document.getElementById('dtBody').innerHTML='<dl class="dgrid"><dt>关联申请</dt><dd>'+o.app+'</dd><dt>状态</dt><dd>'+pill(o.status)+'</dd><dt>供应商</dt><dd>'+esc(o.supplier||'—')+'</dd><dt>金额</dt><dd>'+money(o.amount)+' 元</dd><dt>创建时间</dt><dd>'+o.created+'</dd><dt>预计到货</dt><dd>'+(o.expect||'—')+'</dd></dl><div class="sub">物品快照（不可修改）</div><table class="mini"><thead><tr><th>名称</th><th>规格</th><th>订购</th><th>单价</th><th>已收</th></tr></thead><tbody>'+rows+'</tbody></table><div class="sub">收货记录</div>'+recs;
+ }else{
+  var a=findApp(no);
+  if(!a)return;
+  var irows=a.items.map(function(it){return '<tr><td>'+esc(it.name)+'</td><td>'+esc(it.spec||'—')+'</td><td>'+it.qty+it.unit+'</td><td class="num">'+money(it.price)+'</td><td class="num">'+money(it.qty*it.price)+'</td></tr>';}).join('');
+  var hist=a.hist.map(function(h){return '<div class="tl"><b>'+esc(h.act)+'</b> <span class="muted">'+esc(h.who)+' · 第'+h.r+'轮 · '+h.time+'</span><div>'+esc(h.reason||'—')+'</div></div>';}).join('')||'<p class="muted">暂无审批记录</p>';
+  var link=a.order?'<div class="sub">关联订单</div><p style="font-size:12px">'+a.order+'（'+pill((findOrder(a.order)||{}).status||'待下单')+'）</p>':'<div class="sub">关联订单</div><p class="muted">尚未建单</p>';
+  document.getElementById('dtHead').textContent='申请详情 '+a.no;
+  document.getElementById('dtBody').innerHTML='<dl class="dgrid"><dt>标题</dt><dd>'+esc(a.title||'（未填）')+'</dd><dt>状态</dt><dd>'+pill(a.status)+'</dd><dt>申请人</dt><dd>'+esc(a.user)+'</dd><dt>部门</dt><dd>'+esc(a.dept)+'</dd><dt>用途</dt><dd>'+esc(a.purpose||'—')+'</dd><dt>期望到货日</dt><dd>'+(a.expect||'—')+'</dd><dt>版本/轮次</dt><dd>V'+a.ver+' · 第'+a.round+'轮</dd><dt>合计</dt><dd><b>'+money(a.total)+' 元</b></dd></dl><div class="sub">物品明细</div><table class="mini"><thead><tr><th>名称</th><th>规格</th><th>数量</th><th>单价</th><th>金额</th></tr></thead><tbody>'+irows+'</tbody></table>'+link+'<div class="sub">审批与操作时间线（只读）</div>'+hist;
+ }
+ openDlg('dlgDetail');
+}
+
+document.querySelectorAll('.menu').forEach(function(m){
+ m.addEventListener('click',function(){
+  document.querySelectorAll('.menu').forEach(function(x){x.classList.remove('on');});
+  m.classList.add('on');
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
+  var el=document.getElementById('v-'+m.dataset.view);
+  if(el)el.classList.add('on');
+  renderAll();
+ });
+});
+
+document.getElementById('roleSel').addEventListener('change',function(e){
+ state.role=e.target.value;
+ renderAll();
+ toast('已切换为 '+state.role+'（'+PERSON[state.role].title+'）');
+});
+
+document.addEventListener('click',function(e){
+ var el=e.target.closest('[data-act]');
+ if(!el)return;
+ var act=el.dataset.act,no=el.dataset.no;
+ if(act==='newapp')openForm(null);
+ else if(act==='edit')openForm(no);
+ else if(act==='detail')openDetail(no,el.dataset.kind);
+ else if(act==='submit')doSubmit(no);
+ else if(act==='build')doBuild(no);
+ else if(act==='order')openOrder(no);
+ else if(act==='approve')openApr(no);
+ else if(act==='receive')openRecv(no);
+ else if(act==='saveDraft')saveForm(false);
+ else if(act==='saveSubmit')saveForm(true);
+ else if(act==='okApr')confirmApr(true);
+ else if(act==='okRej')confirmApr(false);
+ else if(act==='okOrder')confirmOrder();
+ else if(act==='okRecv')confirmRecv();
+ else if(act==='close')closeDlg(el.dataset.dlg);
+});
+
+renderAll();
+</script>
+</body>
+</html>

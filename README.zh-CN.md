@@ -1,16 +1,19 @@
 # Hermes PRD Workbench
 
-[English](README.md) · [快速开始](#快速开始) · [文档](docs/README.md) · [交流讨论](https://github.com/YuxForge/hermes-prd-workbench/discussions)
+[English](README.md) · [免注册在线体验](https://yuxforge.github.io/hermes-prd-workbench/) · [快速开始](#快速开始) · [文档](docs/README.md) · [交流讨论](https://github.com/YuxForge/hermes-prd-workbench/discussions)
 
-[![采购审批旗舰案例：观看 60 秒成果回放](docs/examples/procurement/overview.jpg)](docs/examples/procurement/walkthrough.mp4)
+> **从零散需求材料，到可讨论、可追溯的产品与研发交付草案。**
+> 上传材料，发现规则冲突，保留人工判断，继续生成 PRD、原型、测试与技术方案。
 
-[观看 60 秒成果回放](docs/examples/procurement/walkthrough.mp4) · [下载完整交付包](docs/examples/procurement/deliverables.zip) · [查看案例与验证记录](docs/examples/procurement/README.md)
+[免注册体验案例](https://yuxforge.github.io/hermes-prd-workbench/) · [观看 60 秒演示](docs/examples/procurement/walkthrough.mp4) · [下载成果包](docs/examples/procurement/deliverables.zip) · [查看案例与验证记录](docs/examples/procurement/README.md)
 
-0.4.0-beta.2 开源预览版。仅支持全新安装；已验收 macOS arm64 和 Windows 11 WSL2 + Docker Desktop Linux 容器，Linux 原生与原生 Windows 尚未声明支持。
+`自托管` · `原始结果保留` · `人工当前稿独立` · `生成 HTML 隔离预览` · `真实运行生成`
+
+[![采购审批旗舰案例：观看 60 秒成果回放](docs/examples/procurement/overview.jpg)](https://yuxforge.github.io/hermes-prd-workbench/)
 
 可自托管的 PRD 工作台，以 [Hermes Agent](https://github.com/NousResearch/hermes-agent) 为推理核心。支持材料上传、PRD 生成与编辑、评审、HTML Demo、静态 POC、工作量估算、测试用例、技术方案与导出。
 
-面向本地或可信网络中的单实例使用。此项目独立于 Hermes 上游；不提供公共 SaaS、多租户、高可用或自动恢复承诺。模型输出与工作量估算需要人工判断。
+版本 0.4.0-beta.2 开源预览版。面向本地或可信网络中的单实例使用。仅支持全新安装；已验收 macOS arm64 和 Windows 11 WSL2 + Docker Desktop Linux 容器，Linux 原生与原生 Windows 尚未声明支持。此项目独立于 Hermes 上游；不提供公共 SaaS、多租户、高可用或自动恢复承诺。模型输出与工作量估算需要人工判断。
 
 ## 一个具体案例：采购额度冲突，研发应该按哪版做？
 
