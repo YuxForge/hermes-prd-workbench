@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hermes PRD Workbench · 免注册案例体验站</title>
+  <meta name="description" content="免注册体验真实 Hermes Agent 运行成果：从零散材料与规则冲突，到人工决策、交互原型、测试用例与技术方案全流程展示。" />
+  <link rel="stylesheet" href="./showcase.css" />
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container">
+      <div class="logo-area">
+        <div class="logo-icon">H</div>
+        <div class="logo-text">
+          <h1>Hermes PRD Workbench</h1>
+          <span>真实案例体验站 (无需注册 / 零费用)</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="badge-tag">v0.4.0-beta.2 真实运行成果</span>
+        <button type="button" class="btn btn-secondary btn-sm btn-open-video">🎬 60 秒演示</button>
+        <a id="header-download-link" href="./deliverables.zip" class="btn btn-primary btn-sm" download="hermes-procurement-deliverables.zip">📦 交付包 ZIP (234 KB)</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-pill">
+        <span class="dot"></span>
+        <span>交互式静态展示站 · 不调用在线模型 · 浏览器安全沙箱</span>
+      </div>
+      <h1 class="hero-title">从零散需求材料，到可讨论、可追溯的产品与研发交付草案</h1>
+      <p class="hero-subtitle">
+        访客点开链接即可走通完整产品路径：核对两份冲突材料、探究 8,600 元审批差异、检验人工确认单与独立当前稿、在沙箱中操作已生成的单文件交互原型，并下载全套研发交付成果。
+      </p>
+      <div class="hero-buttons">
+        <a href="#stage-1" class="btn btn-primary">🎯 开启全流程体验</a>
+        <button type="button" class="btn btn-secondary btn-open-video">🎬 观看 60 秒成果录屏</button>
+        <a id="hero-download-link" href="./deliverables.zip" class="btn btn-secondary" download="hermes-procurement-deliverables.zip">📦 下载完整交付包 (234 KB)</a>
+        <a href="https://github.com/YuxForge/hermes-prd-workbench" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">⭐ GitHub 源码</a>
+      </div>
+      <div class="features-pills">
+        <span>🔒 自托管</span>
+        <span>·</span>
+        <span>📜 原始结果只读保留</span>
+        <span>·</span>
+        <span>✍️ 人工当前稿独立</span>
+        <span>·</span>
+        <span>🛡️ 生成 HTML 隔离预览</span>
+        <span>·</span>
+        <span>🤖 真实 Agent 运行生成</span>
+      </div>
+
+      <!-- Disclaimer Banner -->
+      <div class="disclaimer-banner">
+        <div>💡</div>
+        <div>
+          <strong>可信边界与运行说明</strong>：本体验站为真实 Hermes Agent 运行成果的免注册交互式展示，不调用在线模型服务，不消耗 API Key。所有原型交互仅在当前浏览器沙箱中生效，可随时一键重置。本站不开放真实材料上传、不放模型 Key，也不播放虚假的“正在生成”动画。原型和技术草案中披露的缺口均如实保留。
+        </div>
+      </div>
+
+      <!-- Step Navigation / Progress Tracker -->
+      <nav class="steps-nav-wrapper" aria-label="案例全流程步骤导航">
+        <div class="steps-nav">
+          <button type="button" class="step-tab active" data-target="stage-1">
+            <span class="step-number">Step 01</span>
+            <span class="step-title">输入需求材料</span>
+          </button>
+          <button type="button" class="step-tab" data-target="stage-2">
+            <span class="step-number">Step 02</span>
+            <span class="step-title">评审与冲突发现</span>
+          </button>
+          <button type="button" class="step-tab" data-target="stage-3">
+            <span class="step-number">Step 03</span>
+            <span class="step-title">人工决策与当前稿</span>
+          </button>
+          <button type="button" class="step-tab" data-target="stage-4">
+            <span class="step-number">Step 04</span>
+            <span class="step-title">操作生成原型</span>
+          </button>
+          <button type="button" class="step-tab" data-target="stage-5">
+            <span class="step-number">Step 05</span>
+            <span class="step-title">研发交付包与下载</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="container">
+
+    <!-- Stage 1: Input Materials -->
+    <section id="stage-1" class="stage-section">
+      <div class="stage-header">
+        <div>
+          <div class="stage-header-title">
+            <span class="stage-badge">Step 01</span>
+            <h2>原始输入材料与规则源头</h2>
+          </div>
+          <p class="stage-subtitle">真实业务中，需求往往由多位业务方在不同时间口头提供或表格补充，不可避免存在规则漏洞与矛盾</p>
+        </div>
+      </div>
+
+      <!-- Conflict Highlight Card -->
+      <div class="conflict-highlight-card">
+        <h4>⚠️ 核心冲突聚焦：两份材料中的审批金额阈值完全不一致</h4>
+        <div class="conflict-quotes-grid">
+          <div class="quote-box">
+            <div class="quote-source">📄 01-客户访谈纪要.md（业务主管口头诉求）</div>
+            <div class="quote-text">
+              “金额<mark>不超过 5,000 元</mark>的申请，我同意就能买；<mark>超过 5,000 元还要财务复核</mark>。”
+            </div>
+          </div>
+          <div class="quote-box">
+            <div class="quote-source">📄 02-业务规则补充.md（运营负责人补充表格）</div>
+            <div class="quote-text">
+              “采购总额<mark>小于 10,000 元</mark>，部门主管批准即可；<mark>达到 10,000 元才需要财务复核</mark>。”
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sources Viewer Tabs -->
+      <div class="sources-tabs-header">
+        <button type="button" class="source-tab-btn active" data-key="source1">01-客户访谈纪要.md</button>
+        <button type="button" class="source-tab-btn" data-key="source2">02-业务规则补充.md</button>
+        <button type="button" class="source-tab-btn" data-key="source3">03-现状与交付约束.md</button>
+      </div>
+      <div id="source-content-box" class="source-content-box"># 设备采购与审批：客户访谈纪要
+
+> 完全虚构的公开演示材料。组织、人物、单据与金额均为合成数据，不对应任何客户。
+
+## 场景与目标
+虚构组织「青岚工坊」有三个部门：设计部、研发部、运营部。办公设备采购目前依赖聊天和表格：申请人发需求，主管回复同意，采购员自行下单，仓管再核对到货。月底常常不知道某笔采购是否已经审批、是否收齐。
+
+一期做一个桌面端设备采购工作台，覆盖四个模块：采购申请、审批待办、采购订单、收货登记。
+
+## 角色与流程
+- 申请人只看自己的申请，可保存草稿、编辑草稿、提交，查看驳回理由。
+- 部门主管只能审核本部门申请，不能审核自己的申请。
+- 采购员只能对已批准申请建采购订单，并录入供应商、预计到货日和明细。
+- 仓管只登记已下单订单的实际收货数量，可分多次收货，全部收齐后订单完成。
+
+主管在会上说：“金额不超过 5,000 元的申请，我同意就能买；超过 5,000 元还要财务复核。”财务复核角色的归属和自审替代人还没有确定。
+
+## 用于演示的设备
+- 显示器：2 台，单价 1,800.00 元。
+- 扩展坞：2 个，单价 450.00 元。
+- 合计：4,500.00 元。
+- 第二笔申请：设计工作站 1 台，单价 8,600.00 元，用于观察高额审批规则。</div>
+    </section>
+
+    <!-- Stage 2: Review Findings & Conflict Analysis -->
+    <section id="stage-2" class="stage-section">
+      <div class="stage-header">
+        <div>
+          <div class="stage-header-title">
+            <span class="stage-badge">Step 02</span>
+            <h2>评审发现：为什么 8,600 元申请暴露了规则撕裂？</h2>
+          </div>
+          <p class="stage-subtitle">Hermes Agent 评审模式执行深度交叉比对，在编码前阻断了导致系统故障的 8 项关键缺陷</p>
+        </div>
+      </div>
+
+      <!-- Conflict Simulator -->
+      <div class="conflict-simulator">
+        <div class="simulator-header">
+          <h4>🧪 规则冲突模拟器：点击不同金额查看审批路径分歧</h4>
+          <p>4,500 元的申请在两套规则下表现一致，但 8,600 元的申请正好落在分歧区间：</p>
+        </div>
+        <div class="amount-picker">
+          <button type="button" class="amount-btn" data-val="4500">¥4,500（2台显示器+扩展坞）</button>
+          <button type="button" class="amount-btn active" data-val="8600">¥8,600（1台设计工作站 · 冲突点）</button>
+          <button type="button" class="amount-btn" data-val="12000">¥12,000（服务器配件）</button>
+        </div>
+        <div class="simulation-result">
+          <div class="result-col">
+            <h5>按《01-客户访谈纪要》（5,000 元线）：</h5>
+            <span id="res-rule-01" class="result-badge badge-finance">超过 5,000 元 → 必须财务二级复核</span>
+          </div>
+          <div class="result-col">
+            <h5>按《02-业务规则补充》（10,000 元线）：</h5>
+            <span id="res-rule-02" class="result-badge badge-conflict">小于 10,000 元 → 主管终审即可（无需财务复核）</span>
+          </div>
+        </div>
+        <div id="conflict-alert" class="disclaimer-banner" style="margin-top: 14px; margin-bottom: 0;">
+          ⚠️ 规则冲突爆发！8,600 元的设计工作站申请落入分歧区间。若按访谈纪要需要财务复核，按补充规则主管批准即可买。若直接交给研发开发，系统将出现重大越权漏洞或流程卡死！
+        </div>
+      </div>
+
+      <!-- Hermes 8 Blocking Findings -->
+      <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--ink);">Hermes Agent 评审识别出的 8 项阻断性问题（节选）：</h3>
+      <div class="review-findings-grid">
+        <div class="finding-card">
+          <div class="finding-title">
+            <span class="tag-blocking">阻断</span>
+            <span>1. 审批金额阈值 5,000 与 10,000 两套口径冲突</span>
+          </div>
+          <p class="finding-desc">8,600 元演示单正好落在分歧区。数值不同且边界包含性不同（≤5,000 免复核 vs &lt;10,000 免复核），审批状态机分支与用例无法定稿。</p>
+        </div>
+        <div class="finding-card">
+          <div class="finding-title">
+            <span class="tag-blocking">阻断</span>
+            <span>2. 财务复核在四个模块中没有落点</span>
+          </div>
+          <p class="finding-desc">状态机中缺少“待财务复核”，复核员方宁无专用入口、无数据范围过滤，高额单据提交后将成为死单。</p>
+        </div>
+        <div class="finding-card">
+          <div class="finding-title">
+            <span class="tag-blocking">阻断</span>
+            <span>3. 主管自审被禁止但无替代人或兜底路径</span>
+          </div>
+          <p class="finding-desc">设计部主管周禾一旦提交申请，其单据既不能被自己审、也没有规则指定代理人，流程无合法审批人。</p>
+        </div>
+        <div class="finding-card">
+          <div class="finding-title">
+            <span class="tag-blocking">阻断</span>
+            <span>4. 驳回后「原单重提」与「新建单」未定</span>
+          </div>
+          <p class="finding-desc">决定单号生成时机、版本计数、历史审批留痕与“一申请一订单”唯一约束作用的表结构与测试用例。</p>
+        </div>
+        <div class="finding-card">
+          <div class="finding-title">
+            <span class="tag-blocking">阻断</span>
+            <span>5. 申请、订单、收货三套状态枚举不一致</span>
+          </div>
+          <p class="finding-desc">未定义“订单完成”的判定准则（全部行累计收货数=订购数），申请详情缺少关联的收货汇总字段承载。</p>
+        </div>
+        <div class="finding-card">
+          <div class="finding-title">
+            <span class="tag-blocking">阻断</span>
+            <span>6. 并发与幂等只有口头目标没有机制</span>
+          </div>
+          <p class="finding-desc">多人同时点击审批防并发批准/驳回、防重复建单、收货超收拦截缺少乐观锁或事务条件校验契约。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stage 3: Human Decisions & Draft Separation -->
+    <section id="stage-3" class="stage-section">
+      <div class="stage-header">
+        <div>
+          <div class="stage-header-title">
+            <span class="stage-badge">Step 03</span>
+            <h2>人工决策与当前稿独立管理</h2>
+          </div>
+          <p class="stage-subtitle">AI 决定分析与草案，人类决定业务规则：原始结果只读归档，人工修改保存为独立当前稿</p>
+        </div>
+      </div>
+
+      <!-- Decisions summary -->
+      <div class="decision-summary-grid">
+        <div class="decision-card">
+          <h4>D01：审批额度最终拍板</h4>
+          <p>业务方确认采用 <strong>5,000.00 元边界</strong>：单据总额 ≤5,000.00 元主管审批通过即批准；&gt;5,000.00 元（包括 8,600.00 元）必须经财务二级复核。5,000.00 元无需财务，5,000.01 元需要。</p>
+        </div>
+        <div class="decision-card">
+          <h4>D02：财务复核入口与状态</h4>
+          <p>财务复核纳入「审批待办」模块，按角色展示。申请单状态统一为：<strong>草稿、待主管审批、待财务复核、已批准、已驳回</strong>。两级驳回均回到已驳回。</p>
+        </div>
+        <div class="decision-card">
+          <h4>D03：自审与代理授权</h4>
+          <p>设计部主管周禾的申请由研发部主管许原代审；研发部主管许原的申请由设计部主管周禾代审；代审行为记入审计时间线，杜绝无审批人死单。</p>
+        </div>
+        <div class="decision-card">
+          <h4>D04：驳回后原单修改重提</h4>
+          <p>驳回后申请人修改原单重新提交，单号保持不变，版本与审批轮次递增（Version+1）；上一轮审批记录只读留痕，新一轮走完整审批链。</p>
+        </div>
+      </div>
+
+      <div class="architecture-callout">
+        <strong>💡 为什么工作台必须坚持“原始结果不可变，人工修订独立保存”？</strong><br />
+        传统工具常将 AI 生成物直接覆盖或由用户在线涂改，导致后续生成步骤出现严重的“上下文漂移”与幻觉。Hermes PRD 工作台将 Agent 原始输出只读固化为版本快照，人类产品经理的校对、决策单独存为当前稿（Current Draft）。下游的原型、测试用例、技术方案生成只读取人类校对后的当前稿，确保交付工程具备绝对确定性。
+      </div>
+    </section>
+
+    <!-- Stage 4: Prototype Sandboxed Operation -->
+    <section id="stage-4" class="stage-section">
+      <div class="stage-header">
+        <div>
+          <div class="stage-header-title">
+            <span class="stage-badge">Step 04</span>
+            <h2>操作真实生成的单文件交互原型</h2>
+          </div>
+          <p class="stage-subtitle">由 Hermes Agent 自动生成的完整单文件 HTML 原型，在安全沙箱隔离环境中运行</p>
+        </div>
+      </div>
+
+      <!-- Prototype Interactive Sandbox -->
+      <div class="prototype-container">
+        <div class="prototype-toolbar">
+          <div class="sandbox-pill">
+            <span>🛡️ 安全沙箱运行中</span>
+            <span style="color: var(--ink-muted); font-size: 11px;">(已配置 sandbox="allow-scripts"，未授权 allow-same-origin)</span>
+          </div>
+          <div class="prototype-actions">
+            <button type="button" id="btn-reset-prototype" class="btn btn-secondary btn-sm">🔄 重置原型数据</button>
+            <button type="button" id="btn-open-prototype" class="btn btn-primary btn-sm">↗️ 新窗口全屏查看</button>
+          </div>
+        </div>
+
+        <div class="prototype-frame-wrapper">
+          <iframe
+            id="prototype-frame"
+            class="prototype-frame"
+            src="./procurement-demo.html"
+            sandbox="allow-scripts"
+            title="青岚工坊 · 设备采购与审批原型"
+            loading="lazy">
+          </iframe>
+        </div>
+      </div>
+
+      <!-- Guidance Cards -->
+      <div class="prototype-guidance">
+        <div class="guide-step">
+          <strong>场景 A：验证 8,600 元高额审批</strong>
+          <span>在【采购申请】中查看或新增 8,600 元设计工作站申请，提交后观察系统根据 D01 决策要求流转至财务复核。</span>
+        </div>
+        <div class="guide-step">
+          <strong>场景 B：主管审批与财务二级复核</strong>
+          <span>切换至【审批待办】，体验李主管审核，再体验方宁财务复核；同时尝试驳回，验证版本轮次自增。</span>
+        </div>
+        <div class="guide-step">
+          <strong>场景 C：采购建单与分批收货</strong>
+          <span>在【采购订单】中下单，进入【收货登记】按明细录入到货量，体验超收拦截与完成状态计算。</span>
+        </div>
+      </div>
+
+      <div class="disclaimer-banner" style="margin-top: 16px; margin-bottom: 0;">
+        💡 <strong>原型运行边界披露</strong>：此原型基于浏览器内存与虚构种子数据运行，修改只在当前浏览器标签页生效，刷新或点击“重置原型数据”即可恢复初始状态。原型用于产品体验与需求走查，不代表生产数据库与高并发鉴权。
+      </div>
+    </section>
+
+    <!-- Stage 5: Downstream Deliverables -->
+    <section id="stage-5" class="stage-section">
+      <div class="stage-header">
+        <div>
+          <div class="stage-header-title">
+            <span class="stage-badge">Step 05</span>
+            <h2>下游研发交付成果包与下载</h2>
+          </div>
+          <p class="stage-subtitle">需求明确与原型验证后，工作台一键生成面向产研交付的全部衍生规格与资产</p>
+        </div>
+      </div>
+
+      <div class="deliverables-grid">
+        <div class="deliverable-card">
+          <div>
+            <div class="deliverable-icon">📘</div>
+            <h4>PRD 需求规格说明书</h4>
+            <p>包含信息架构、状态机、数据字典、权限矩阵及 AC01~AC09 验收准则，支持多文件包或合并单文件。</p>
+          </div>
+          <span class="deliverable-meta">12 份模块文件 · 完整 Markdown</span>
+        </div>
+        <div class="deliverable-card">
+          <div>
+            <div class="deliverable-icon">🧪</div>
+            <h4>系统测试用例清单</h4>
+            <p>覆盖 5,000 元界线边界值、主管自审拦截、驳回重提轮次、超额收货拦截等 27 条测试草案与 XLSX。</p>
+          </div>
+          <span class="deliverable-meta">27 条测试用例 · XLSX / JSON</span>
+        </div>
+        <div class="deliverable-card">
+          <div>
+            <div class="deliverable-icon">⚙️</div>
+            <h4>研发技术方案 (TechSpec)</h4>
+            <p>9 张 MySQL 表结构 DDL、13 个 RESTful API 契约、乐观锁版本号与事务隔离边界，与静态原型明确区分。</p>
+          </div>
+          <span class="deliverable-meta">9 张表 / 13 个接口 · Markdown</span>
+        </div>
+        <div class="deliverable-card">
+          <div>
+            <div class="deliverable-icon">📊</div>
+            <h4>工作量评估与报价表</h4>
+            <p>基于明确假设拆解 12 条开发与研发自测明细，明示不包含第三方税额与未定需求，不把未知当零工时。</p>
+          </div>
+          <span class="deliverable-meta">12 条估算明细 · XLSX 格式</span>
+        </div>
+      </div>
+
+      <!-- Download Box -->
+      <div class="download-box">
+        <h3>📦 一键下载案例全套交付包</h3>
+        <p>包含上述全部原始 PRD、人工校对稿、HTML 交互原型、测试用例 XLSX、技术方案 Markdown 与估算表（总大小约 234 KB）：</p>
+        <a id="main-download-link" href="./deliverables.zip" class="btn btn-primary" download="hermes-procurement-deliverables.zip">
+          📦 下载完整交付大礼包 ZIP (234 KB)
+        </a>
+      </div>
+    </section>
+
+    <!-- Self-Hosting Quickstart Section -->
+    <section class="quickstart-section">
+      <h2>准备好在你的本地自托管 Hermes PRD 工作台了吗？</h2>
+      <p>面向本地或可信网络单实例使用。支持 DeepSeek、Claude、GPT 等任意兼容 Chat Completions 的工具模型，材料与密钥完全私有留在本地。</p>
+      <div class="code-block">
+        <span class="comment"># 1. 克隆代码仓库</span><br />
+        git clone https://github.com/YuxForge/hermes-prd-workbench.git<br />
+        cd hermes-prd-workbench<br /><br />
+        <span class="comment"># 2. 交互式配置模型与管理员密码</span><br />
+        ./workbench setup<br /><br />
+        <span class="comment"># 3. 一键启动 Docker 容器栈并打开 http://127.0.0.1:8180</span><br />
+        ./workbench start<br />
+        ./workbench doctor
+      </div>
+      <div>
+        <a href="https://github.com/YuxForge/hermes-prd-workbench" target="_blank" rel="noopener noreferrer" class="btn btn-primary">⭐ 在 GitHub 查看项目</a>
+        <a href="https://github.com/YuxForge/hermes-prd-workbench/discussions" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="color: #fff; border-color: #4b5563;">💬 社区交流讨论</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Video Walkthrough Modal Dialog -->
+  <dialog id="video-dialog" class="video-modal">
+    <div class="modal-header">
+      <h3>🎬 60 秒成果演示回放（带中文字幕 · 无声录屏）</h3>
+      <button type="button" class="btn-close btn-close-modal" aria-label="关闭">&times;</button>
+    </div>
+    <div class="modal-body">
+      <video id="demo-video" controls width="800" height="450" preload="metadata" poster="./overview.jpg">
+        <source src="./walkthrough.mp4" type="video/mp4" />
+        您的浏览器不支持 HTML5 视频播放。
+      </video>
+      <p class="video-tip">注：视频为真实工作台操作与已生成成果的剪辑回放，60 秒为剪辑时长，不代表模型生成耗时。</p>
+    </div>
+  </dialog>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://github.com/YuxForge/hermes-prd-workbench" target="_blank" rel="noopener noreferrer">GitHub 仓库</a>
+        <span>·</span>
+        <a href="https://github.com/YuxForge/hermes-prd-workbench/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">Apache-2.0 许可证</a>
+        <span>·</span>
+        <a href="https://github.com/YuxForge/hermes-prd-workbench/tree/main/docs" target="_blank" rel="noopener noreferrer">项目文档</a>
+        <span>·</span>
+        <a href="https://github.com/YuxForge/hermes-prd-workbench/discussions" target="_blank" rel="noopener noreferrer">问题与建议</a>
+      </div>
+      <p>Hermes PRD Workbench · 真实运行生成的公开案例体验站</p>
+    </div>
+  </footer>
+
+  <script src="./showcase.js"></script>
+</body>
+</html>

@@ -1,16 +1,20 @@
 # Hermes PRD Workbench
 
 [![Source release checks](https://github.com/YuxForge/hermes-prd-workbench/actions/workflows/check.yml/badge.svg)](https://github.com/YuxForge/hermes-prd-workbench/actions/workflows/check.yml)
+[![Pages Showcase](https://github.com/YuxForge/hermes-prd-workbench/actions/workflows/pages.yml/badge.svg)](https://yuxforge.github.io/hermes-prd-workbench/)
 [![Release](https://img.shields.io/github/v/release/YuxForge/hermes-prd-workbench?include_prereleases)](https://github.com/YuxForge/hermes-prd-workbench/releases)
 [![License](https://img.shields.io/github/license/YuxForge/hermes-prd-workbench)](LICENSE)
 
-**Turn raw requirements into reviewable PRDs, technical specifications, test cases, estimates, and interactive prototypes with Hermes Agent.**
+> **Turn messy requirement notes into reviewable, traceable PRDs, interactive prototypes, test plans, and technical specifications.**
+> Upload source material, expose conflicting business rules, preserve human decisions, and generate downstream engineering drafts with Hermes Agent.
+
+[Live Showcase (No registration)](https://yuxforge.github.io/hermes-prd-workbench/) · [Watch 60-Second Walkthrough](docs/examples/procurement/walkthrough.mp4) · [Download Deliverables Package](docs/examples/procurement/deliverables.zip) · [Read Case Study](docs/examples/procurement/README.md)
+
+`Self-hosted` · `Immutable Agent Results` · `Separate Working Draft` · `Sandboxed HTML Preview` · `Real Synthetic Execution`
 
 [中文说明](README.zh-CN.md) · [Quick start](#quick-start) · [Documentation](docs/README.md) · [Roadmap](https://github.com/YuxForge/hermes-prd-workbench/issues?q=is%3Aissue+is%3Aopen+label%3Aroadmap) · [Discussions](https://github.com/YuxForge/hermes-prd-workbench/discussions) · [Security](SECURITY.md)
 
-[![Procurement approval case: watch the 60-second walkthrough](docs/examples/procurement/overview.jpg)](docs/examples/procurement/walkthrough.mp4)
-
-[Watch the 60-second walkthrough](docs/examples/procurement/walkthrough.mp4) · [Download the example deliverables](docs/examples/procurement/deliverables.zip) · [Explore the complete case](docs/examples/procurement/README.md)
+[![Procurement approval case: explore interactive demo](docs/examples/procurement/overview.jpg)](https://yuxforge.github.io/hermes-prd-workbench/)
 
 Hermes PRD Workbench is an Apache-2.0 self-hosted workspace for product and engineering teams. Upload source material once, preserve the original Agent result, refine a separate working draft, and continue from the same context into reviews and downstream deliverables.
 

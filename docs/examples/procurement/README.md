@@ -4,9 +4,9 @@
 
 四个业务模块贯穿整个案例：**采购申请 → 审批待办 → 采购订单 → 收货登记**。组织、人物、设备、单据和金额全部虚构。输入材料由维护者编写，成果通过本地一键启动的真实 Hermes 工作台生成，未用预制响应替代模型运行。
 
-[![采购审批案例成果](overview.jpg)](walkthrough.mp4)
+[![采购审批案例成果](overview.jpg)](https://yuxforge.github.io/hermes-prd-workbench/)
 
-[观看 60 秒成果回放](walkthrough.mp4) · [下载交付包 ZIP](deliverables.zip) · [输入材料](sources/01-客户访谈纪要.md) · [验证记录](validation.md)
+[免注册在线体验案例](https://yuxforge.github.io/hermes-prd-workbench/) · [观看 60 秒成果回放](walkthrough.mp4) · [下载交付包 ZIP](deliverables.zip) · [输入材料](sources/01-客户访谈纪要.md) · [验证记录](validation.md)
 
 视频展示真实工作台操作与已生成成果，长时间的模型等待不在视频中；60 秒是剪辑长度，不是生成耗时。视频为带中文字幕的无声录屏。
 
