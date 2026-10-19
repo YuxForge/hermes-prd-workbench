@@ -234,7 +234,62 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 6. Direct file:// protocol fallback for offline inspection
+  // 6. Deliverables Explorer Tabs & Filters
+  const explorerTabBtns = document.querySelectorAll(".explorer-tab-btn");
+  const explorerPanels = document.querySelectorAll(".explorer-panel");
+
+  explorerTabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const targetTab = btn.getAttribute("data-tab");
+      explorerTabBtns.forEach((b) => b.classList.remove("active"));
+      explorerPanels.forEach((p) => p.classList.remove("active"));
+
+      btn.classList.add("active");
+      const targetPanel = document.getElementById("panel-" + targetTab);
+      if (targetPanel) {
+        targetPanel.classList.add("active");
+      }
+    });
+  });
+
+  const techspecSubtabBtns = document.querySelectorAll(".techspec-subtab-btn");
+  const techspecSubpanels = document.querySelectorAll(".techspec-subpanel");
+
+  techspecSubtabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const targetSubtab = btn.getAttribute("data-subtab");
+      techspecSubtabBtns.forEach((b) => b.classList.remove("active"));
+      techspecSubpanels.forEach((p) => p.classList.remove("active"));
+
+      btn.classList.add("active");
+      const targetSubpanel = document.getElementById("subpanel-" + targetSubtab);
+      if (targetSubpanel) {
+        targetSubpanel.classList.add("active");
+      }
+    });
+  });
+
+  const tcFilterBtns = document.querySelectorAll(".tc-filter-btn");
+  const tcCards = document.querySelectorAll(".tc-card");
+
+  tcFilterBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const moduleName = btn.getAttribute("data-module");
+      tcFilterBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      tcCards.forEach((card) => {
+        const cardModule = card.getAttribute("data-module");
+        if (moduleName === "all" || cardModule === moduleName) {
+          card.style.display = "";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    });
+  });
+
+  // 7. Direct file:// protocol fallback for offline inspection
   if (window.location.protocol === "file:") {
     const zipLinks = document.querySelectorAll('a[href="./deliverables.zip"]');
     zipLinks.forEach((a) => {
