@@ -204,10 +204,6 @@ public class EstimateExcelExporter {
             }
 
             // Row 2: KPI summary
-            double devDays = Math.round(payload.path("devDays").asDouble(0.0) * 10.0) / 10.0;
-            double testDays = Math.round(payload.path("testDays").asDouble(0.0) * 10.0) / 10.0;
-            double totalDays = Math.round((devDays + testDays) * 10.0) / 10.0;
-
             JsonNode items = payload.path("items");
             int pageCount = 0;
             int apiCount = 0;
@@ -221,11 +217,16 @@ public class EstimateExcelExporter {
 
             Double dailyRate = request != null ? request.dailyRate() : null;
             StringBuilder kpiBuilder = new StringBuilder();
-            kpiBuilder.append(String.format("评估概览：总预估人天: %.1f 天  |  开发: %.1f 天  |  自测: %.1f 天  |  页面数: %d  |  接口数: %d",
-                    totalDays, devDays, testDays, pageCount, apiCount));
+            kpiBuilder.append(String.format("评估概览：总预估人天: %s  |  开发: %s  |  自测: %s  |  页面数: %d  |  接口数: %d",
+                    suppliedDays(payload, "totalDays"), suppliedDays(payload, "devDays"),
+                    suppliedDays(payload, "testDays"), pageCount, apiCount));
             if (dailyRate != null && dailyRate > 0) {
-                kpiBuilder.append(String.format("  |  人天基准单价: ¥%.2f/天  |  预估开发总金额: ¥%,.2f",
-                    dailyRate, totalDays * dailyRate));
+                kpiBuilder.append(String.format("  |  人天基准单价: ¥%.2f/天", dailyRate));
+                if (payload.path("totalDays").isNumber()) {
+                    kpiBuilder.append(String.format("  |  预估开发总金额: ¥%,.2f", payload.path("totalDays").asDouble() * dailyRate));
+                } else {
+                    kpiBuilder.append("  |  预估开发总金额: 未提供");
+                }
             }
 
             Row kpiRow = sheet.createRow(rowIndex++);
@@ -295,11 +296,13 @@ public class EstimateExcelExporter {
                         case "devDays":
                         case "testDays":
                         case "totalDays":
-                            cell.setCellFormula(formula);
+                            if (hasAllItemValues(items, col.key())) cell.setCellFormula(formula);
+                            else cell.setCellValue("未提供");
                             cell.setCellStyle(totalNumStyle);
                             break;
                         case "totalPrice":
-                            cell.setCellFormula(formula);
+                            if (dailyRate != null && dailyRate > 0 && hasAllItemValues(items, "totalDays")) cell.setCellFormula(formula);
+                            else cell.setCellValue("未提供");
                             cell.setCellStyle(totalCurrencyStyle);
                             break;
                         default:
@@ -428,21 +431,24 @@ public class EstimateExcelExporter {
                 cell.setCellStyle(numberStyle);
             }
             case "totalDays" -> {
-                cell.setCellValue(item.path("totalDays").asDouble(0.0));
+                if (item.path("totalDays").isNumber()) cell.setCellValue(item.path("totalDays").asDouble());
+                else cell.setCellValue("未提供");
                 cell.setCellStyle(numberStyle);
             }
             case "unitPrice" -> {
-                if (dailyRate != null) {
+                if (dailyRate != null && dailyRate > 0) {
                     cell.setCellValue(dailyRate);
                 } else {
-                    cell.setCellValue(0.0);
+                    cell.setCellValue("未提供");
                 }
                 cell.setCellStyle(currencyStyle);
             }
             case "totalPrice" -> {
-                double days = item.path("totalDays").asDouble(0.0);
-                double rate = dailyRate != null ? dailyRate : 0.0;
-                cell.setCellValue(days * rate);
+                if (item.path("totalDays").isNumber() && dailyRate != null && dailyRate > 0) {
+                    cell.setCellValue(item.path("totalDays").asDouble() * dailyRate);
+                } else {
+                    cell.setCellValue("未提供");
+                }
                 cell.setCellStyle(currencyStyle);
             }
             case "description" -> {
@@ -461,6 +467,17 @@ public class EstimateExcelExporter {
                 cell.setCellStyle(textStyle);
             }
         }
+    }
+
+    private static String suppliedDays(JsonNode payload, String key) {
+        return payload.path(key).isNumber() ? payload.path(key).asText() + " 天" : "未提供";
+    }
+
+    private static boolean hasAllItemValues(JsonNode items, String key) {
+        for (JsonNode item : items) {
+            if (!item.path(key).isNumber()) return false;
+        }
+        return true;
     }
 
     private void setBorders(CellStyle style, BorderStyle border, short color) {

@@ -11,7 +11,7 @@ spec.loader.exec_module(audit)
 errors = []
 for path in audit.candidates():
     relative = path.relative_to(ROOT).as_posix()
-    if path.name == "LICENSE" or path.suffix == ".svg" or relative in audit.PUBLIC_BINARY_ASSETS:
+    if path.name == "LICENSE" or path.suffix == ".svg" or relative in audit.PUBLIC_BINARY_ASSETS or relative in audit.PUBLIC_ARCHIVES:
         continue
     text = path.read_text()
     if not text.endswith("\n") or "\r" in text or any(line.rstrip() != line for line in text.splitlines()):

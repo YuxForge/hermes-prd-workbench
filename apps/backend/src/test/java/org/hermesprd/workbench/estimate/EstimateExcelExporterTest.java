@@ -19,6 +19,60 @@ class EstimateExcelExporterTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
+    void missingOptionalTotalsStayMissingInsteadOfZeroOrDerivedValues() throws Exception {
+        var payload = mapper.readTree("""
+                {"title":"合成估算","scopeNote":"研发自测", "items":[
+                  {"name":"页面","type":"PAGE","devDays":2.125,"testDays":0.5},
+                  {"name":"接口","type":"API","devDays":0,"testDays":0,"totalDays":0}
+                ]}
+                """);
+        String before = payload.toString();
+        var request = new ApiModels.ExportEstimateRequest(null, 1000.0, null, null, null);
+        try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(exporter.export(payload, request)))) {
+            Sheet sheet = wb.getSheetAt(0);
+            String kpi = sheet.getRow(2).getCell(0).getStringCellValue();
+            assertTrue(kpi.contains("总预估人天: 未提供"));
+            assertTrue(kpi.contains("开发: 未提供"));
+            assertTrue(kpi.contains("自测: 未提供"));
+            assertTrue(kpi.contains("预估开发总金额: 未提供"));
+            assertEquals(2.125, sheet.getRow(5).getCell(7).getNumericCellValue());
+            assertEquals("未提供", sheet.getRow(5).getCell(9).getStringCellValue());
+            assertEquals("未提供", sheet.getRow(5).getCell(11).getStringCellValue());
+            assertEquals(0.0, sheet.getRow(6).getCell(9).getNumericCellValue());
+            assertEquals(0.0, sheet.getRow(6).getCell(11).getNumericCellValue());
+            assertEquals("未提供", sheet.getRow(7).getCell(9).getStringCellValue());
+            assertEquals("未提供", sheet.getRow(7).getCell(11).getStringCellValue());
+        }
+        assertEquals(before, payload.toString());
+    }
+
+    @Test
+    void customPriceColumnsWithoutRateStayMissingIncludingSummary() throws Exception {
+        var payload = mapper.readTree("""
+                {"items":[{"devDays":1,"testDays":1,"totalDays":2}]}
+                """);
+        var request = new ApiModels.ExportEstimateRequest(null, null, List.of(
+                new ApiModels.ExportEstimateColumn("unitPrice", null, true),
+                new ApiModels.ExportEstimateColumn("totalPrice", null, true)
+        ), null, null);
+        try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(exporter.export(payload, request)))) {
+            assertEquals("未提供", wb.getSheetAt(0).getRow(5).getCell(0).getStringCellValue());
+            assertEquals("未提供", wb.getSheetAt(0).getRow(5).getCell(1).getStringCellValue());
+            assertEquals("未提供", wb.getSheetAt(0).getRow(6).getCell(1).getStringCellValue());
+        }
+    }
+
+    @Test
+    void suppliedSummaryIsNotReconciledWithDevelopmentAndTestDays() throws Exception {
+        var payload = mapper.readTree("""
+                {"totalDays":99.125,"devDays":2,"testDays":1,"items":[]}
+                """);
+        try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(exporter.export(payload, null)))) {
+            assertTrue(wb.getSheetAt(0).getRow(2).getCell(0).getStringCellValue().contains("总预估人天: 99.125 天"));
+        }
+    }
+
+    @Test
     void exportsValidSingleSheetExcelWorkbookWithFormulasAndDisclaimer() throws Exception {
         var payload = mapper.readTree("""
                 {

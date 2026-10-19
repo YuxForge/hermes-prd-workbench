@@ -271,6 +271,19 @@ public class TestCaseExcelExporter {
                                 p0Style, p1Style, p2Style,
                                 request != null ? request.extraFieldValues() : null);
                     }
+                    int lines = 1;
+                    for (int c = 0; c < colCount; c++) {
+                        Cell cell = dataRow.getCell(c);
+                        if (cell.getCellStyle().getWrapText()) {
+                            int count = 0;
+                            for (String line : cell.getStringCellValue().split("\\n", -1)) {
+                                int width = line.codePoints().map(cp -> cp > 255 ? 2 : 1).sum();
+                                count += Math.max(1, (int) Math.ceil((double) width / columns.get(c).preferredWidth()));
+                            }
+                            lines = Math.max(lines, count);
+                        }
+                    }
+                    dataRow.setHeightInPoints(Math.min(409, Math.max(34, lines * 13 + 8)));
                     itemSeq++;
                 }
             }
@@ -311,6 +324,7 @@ public class TestCaseExcelExporter {
             for (int c = 0; c < colCount; c++) {
                 sheet.setColumnWidth(c, columns.get(c).preferredWidth() * 256);
             }
+            sheet.createFreezePane(2, 5);
 
             workbook.write(out);
             return out.toByteArray();
@@ -419,7 +433,17 @@ public class TestCaseExcelExporter {
                 cell.setCellStyle(wrapTextStyle);
             }
             case "steps" -> {
-                cell.setCellValue(clip(item.path("steps").asText("")));
+                JsonNode steps = item.path("steps");
+                String text = steps.asText("");
+                if (steps.isArray()) {
+                    StringBuilder ordered = new StringBuilder();
+                    for (int i = 0; i < steps.size(); i++) {
+                        if (i > 0) ordered.append('\n');
+                        ordered.append(i + 1).append(". ").append(steps.get(i).asText());
+                    }
+                    text = ordered.toString();
+                }
+                cell.setCellValue(clip(text));
                 cell.setCellStyle(wrapTextStyle);
             }
             case "testData" -> {

@@ -274,9 +274,10 @@ public class TaskBundleExporter {
 
         appendOverviewRow(sb, "4. 工作量评估表", "04_工作量评估与报价表_Estimate.xlsx", latestRuns.get("ESTIMATE"), run -> {
             JsonNode p = getPayload(run);
-            double total = p != null ? p.path("totalDays").asDouble(0.0) : 0.0;
+            String total = p != null && p.path("totalDays").isNumber()
+                    ? p.path("totalDays").asText() + " 天" : "未提供（见明细）";
             int items = p != null && p.has("items") ? p.path("items").size() : 0;
-            return "预估总人天 " + total + " 天 (" + items + " 项细化明细)";
+            return "预估总人天 " + total + " (" + items + " 项细化明细)";
         });
 
         appendOverviewRow(sb, "5. 系统测试用例", "05_系统测试用例清单_TestCase.xlsx", latestRuns.get("TEST_CASE"), run -> {

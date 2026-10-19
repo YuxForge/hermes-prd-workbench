@@ -64,6 +64,40 @@ class TaskBundleExporterTest {
     }
 
     @Test
+    void overviewDoesNotTurnMissingEstimateTotalIntoZero() throws Exception {
+        TaskEntity task = new TaskEntity();
+        task.setId("task_missing_total");
+        task.setTitle("合成估算");
+        when(taskService.requireOwned("user_1", task.getId())).thenReturn(task);
+        RunEntity run = new RunEntity();
+        run.setId("run_est_missing");
+        run.setMode("ESTIMATE");
+        run.setStatus("SUCCEEDED");
+        run.setCreatedAt(Instant.now());
+        when(runMapper.selectList(any())).thenReturn(List.of(run));
+        ResultEntity result = new ResultEntity();
+        when(runService.findResult(run.getId())).thenReturn(result);
+        var payload = objectMapper.readTree("""
+                {"items":[{"devDays":2,"testDays":1}]}
+                """);
+        when(runService.resultPayload(result)).thenReturn(payload);
+        when(estimateExcelExporter.export(eq(payload), any())).thenReturn(new byte[]{1});
+        boolean found = false;
+        try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(bundleExporter.exportBundle("user_1", task.getId())), StandardCharsets.UTF_8)) {
+            ZipEntry entry;
+            while ((entry = zip.getNextEntry()) != null) {
+                if (entry.getName().equals("00_项目交付清单与资产概览.md")) {
+                    String overview = new String(zip.readAllBytes(), StandardCharsets.UTF_8);
+                    assertTrue(overview.contains("预估总人天 未提供（见明细）"));
+                    assertTrue(!overview.contains("预估总人天 0"));
+                    found = true;
+                }
+            }
+        }
+        assertTrue(found);
+    }
+
+    @Test
     void exportsFullZipBundleWithAllAssets() throws Exception {
         String userId = "user_1";
         String taskId = "task_bundle_test";

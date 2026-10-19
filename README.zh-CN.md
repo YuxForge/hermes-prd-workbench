@@ -2,13 +2,23 @@
 
 [English](README.md) · [快速开始](#快速开始) · [文档](docs/README.md) · [交流讨论](https://github.com/YuxForge/hermes-prd-workbench/discussions)
 
-![Hermes PRD Workbench 演示](docs/assets/hermes-prd-workbench-demo.gif)
+[![采购审批旗舰案例：观看 60 秒成果回放](docs/examples/procurement/overview.jpg)](docs/examples/procurement/walkthrough.mp4)
+
+[观看 60 秒成果回放](docs/examples/procurement/walkthrough.mp4) · [下载完整交付包](docs/examples/procurement/deliverables.zip) · [查看案例与验证记录](docs/examples/procurement/README.md)
 
 0.4.0-beta.2 开源预览版。仅支持全新安装；已验收 macOS arm64 和 Windows 11 WSL2 + Docker Desktop Linux 容器，Linux 原生与原生 Windows 尚未声明支持。
 
 可自托管的 PRD 工作台，以 [Hermes Agent](https://github.com/NousResearch/hermes-agent) 为推理核心。支持材料上传、PRD 生成与编辑、评审、HTML Demo、静态 POC、工作量估算、测试用例、技术方案与导出。
 
 面向本地或可信网络中的单实例使用。此项目独立于 Hermes 上游；不提供公共 SaaS、多租户、高可用或自动恢复承诺。模型输出与工作量估算需要人工判断。
+
+## 一个具体案例：采购额度冲突，研发应该按哪版做？
+
+会议纪要说「不超过 5,000 元，主管批准即可」，补充规则却写「小于 10,000 元，无需财务复核」。**同一笔 8,600 元工作站申请，在两份材料下会走不同审批路径。**
+
+我们用完全合成的中文材料，在本地真实启动的工作台中完成了这条链路：材料评审发现 8 项关键问题 → 维护者代表虚构业务方明确决定 → 生成四模块 PRD 并独立保存人工当前稿 → 生成可点击原型、测试用例、技术方案和工作量估算 → 导出交付包。
+
+包内可以直接检查 PRD 文档包、原始评审与处理记录、HTML Demo、测试用例 XLSX、技术方案和估算 XLSX。[完整案例](docs/examples/procurement/README.md)同时列出待确认问题和实际验证范围，便于自己判断成果是否有用。视频是约 60 秒的真实浏览器操作剪辑，不代表模型只需 60 秒；所有业务数据虚构，静态原型不等于可上线的采购系统。
 
 ## 快速开始
 

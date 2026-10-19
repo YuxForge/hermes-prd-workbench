@@ -19,6 +19,21 @@ class TestCaseExcelExporterTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
+    void preservesOrderedArrayStepsAndFitsWrappedRowsWithoutChangingPayload() throws Exception {
+        var payload = mapper.readTree("""
+                {"items":[{"caseId":"TC-ARRAY","steps":["以主管登录并打开待办", "核对5000.00元申请明细", "通过后检查财务待办为空", "由采购确认可创建订单"]}]}
+                """);
+        String before = payload.toString();
+        try (Workbook wb = new XSSFWorkbook(new ByteArrayInputStream(exporter.export(payload, null)))) {
+            Sheet sheet = wb.getSheetAt(0);
+            assertEquals("1. 以主管登录并打开待办\n2. 核对5000.00元申请明细\n3. 通过后检查财务待办为空\n4. 由采购确认可创建订单", sheet.getRow(5).getCell(8).getStringCellValue());
+            assertTrue(sheet.getRow(5).getHeightInPoints() > 34);
+            assertNotNull(sheet.getPaneInformation());
+        }
+        assertEquals(before, payload.toString());
+    }
+
+    @Test
     void exportsValidSingleSheetTestCaseExcelWorkbook() throws Exception {
         var payload = mapper.readTree("""
                 {
@@ -109,6 +124,7 @@ class TestCaseExcelExporterTest {
             assertEquals("新增渠道基础配置成功", sheet.getRow(5).getCell(4).getStringCellValue());
             assertEquals("功能测试", sheet.getRow(5).getCell(5).getStringCellValue());
             assertEquals("P0", sheet.getRow(5).getCell(6).getStringCellValue());
+            assertEquals("1. 点击新增按钮\n2. 填写渠道名称\n3. 点击保存", sheet.getRow(5).getCell(8).getStringCellValue());
 
             // Row 6 (second case)
             assertEquals(2, (int) sheet.getRow(6).getCell(0).getNumericCellValue());

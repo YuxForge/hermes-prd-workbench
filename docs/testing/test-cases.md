@@ -22,6 +22,8 @@ Use a fresh project-owned MySQL schema, pinned Hermes source with the reviewed A
 | OSS-T16 | Untrusted PR and release workflow/source archive | No PR secrets/publication authority; allowlisted files and hashes |
 | OSS-T18 | Compose browser Origin through default/custom Web ports | Same-origin login and writes pass with Host port preserved; hostile/null origins and unauthorized role access remain denied; native development preflight retains explicit allowlist |
 | OSS-T17 | Chinese synthetic materials, seven real Agent modes | Tools submit parseable persistent results; refresh/manual retry/export work |
+| CASE-T01 | Flagship case download and optional estimate totals | Missing summary/item totals display 未提供; supplied zero/precision/conflicting totals and immutable payload remain unchanged; no derived replacement conclusion |
+| CASE-T02 | Test-case XLSX string/array steps | Ordered array entries become numbered lines, strings remain unchanged, wrapped rows fit and headers freeze; original result is not rewritten |
 
 Regression also covers PRD-01/02 and THIN-REQ-01/02/03/05/07 from product.md: create requirement; Chinese MD/DOCX/XLSX upload and empty-material validation; current draft save/unsaved/concurrency; review decision inheritance; real runs; refresh/history/export; explicit failure/manual rerun; user cannot access admin.
 
