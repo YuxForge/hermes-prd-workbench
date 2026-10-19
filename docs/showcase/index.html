@@ -385,6 +385,876 @@
         </div>
       </div>
 
+            <!-- Deliverables Interactive Online Explorer -->
+      <div class="deliverables-explorer">
+        <nav class="explorer-nav" aria-label="成果在线检视器标签">
+          <button type="button" class="explorer-tab-btn active" data-target="panel-prd">
+            <span>📘 PRD 需求规格 (4大业务模块)</span>
+          </button>
+          <button type="button" class="explorer-tab-btn" data-target="panel-testcases">
+            <span>🧪 系统测试用例清单 (27条完整用例)</span>
+          </button>
+          <button type="button" class="explorer-tab-btn" data-target="panel-techspec">
+            <span>⚙️ 研发技术方案 (9表DDL / 13接口契约)</span>
+          </button>
+          <button type="button" class="explorer-tab-btn" data-target="panel-estimate">
+            <span>📊 工作量估算与报价明细 (12项细化)</span>
+          </button>
+        </nav>
+
+        <!-- Panel 1: PRD Viewer -->
+        <div id="panel-prd" class="explorer-panel active">
+          <div class="prd-viewer-header">
+            <div>
+              <h3>旗舰案例 · 设备采购与审批系统 PRD 规格明细</h3>
+              <p style="font-size:12px;color:var(--ink-muted);margin-top:2px;">以人工校对后的生产基线（Current Baseline）呈现，与原始 Agent 输出保持只读隔离</p>
+            </div>
+            <span class="badge-tag" style="background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;">可直接指导研发开工</span>
+          </div>
+
+          <div class="prd-module-card">
+            <h4>📦 模块一：采购申请 (purchase-request)</h4>
+            <ul class="prd-rules-list">
+              <li><strong>单号生成机制：</strong>保存草稿时由系统生成全局唯一申请单号（前缀 SQ + 年月日 + 6位递增流水，如 SQ20261019000001），初始化版本 version=1、轮次 round_no=1。</li>
+              <li><strong>草稿暂存与全量校验：</strong>保存草稿允许缺失标题或用途暂存，明细单价/数量合法即可算出行金额；点击“提交审批”才执行全量必填校验（标题 1–100 字、用途 1–500 字、期望到货日不早于当天、至少一行明细）。</li>
+              <li><strong>驳回重提机制 (D04)：</strong>单据被驳回后申请人可在原单修改重新提交；<strong>单号保持不变</strong>，版本与审批轮次各自增 1 (version+1, round_no+1)；上一轮审批记录与驳回理由只读归档，新一轮重走完整审批链。</li>
+              <li><strong>不可编辑与防越权：</strong>提交审批后或已批准单据整单永久只读，申请人侧所有编辑与撤回入口消失，服务端返回 403 严格防越权。</li>
+            </ul>
+          </div>
+
+          <div class="prd-module-card">
+            <h4>⚖️ 模块二：审批待办 (approval-todo)</h4>
+            <ul class="prd-rules-list">
+              <li><strong>金额路由拍板 (D01)：</strong>申请明细按行金额（数量×单价）汇总结算；总额 <strong>&le; 5,000.00 元</strong> 主管通过即批准 (APPROVED)；总额 <strong>&gt; 5,000.00 元</strong>（含 5,000.01 与 8,600.00 元）主管通过后推进至待财务复核 (PENDING_FINANCE)，财务通过后才进入已批准。</li>
+              <li><strong>角色待办隔离：</strong>主管仅看本部门待主管审批单据；财务复核员可跨部门看待财务复核单据。</li>
+              <li><strong>自审拦截与代审授权 (D03)：</strong>主管与财务本人提交申请严禁自审；设计部主管周禾与研发部主管许原互为对方本人申请代审，代审操作明确记录代审人与时间线，杜绝死单。</li>
+              <li><strong>驳回规则：</strong>驳回必须填写 1–200 字理由，缺失理由无法驳回；驳回后单据流转至已驳回终态 (REJECTED)。</li>
+            </ul>
+          </div>
+
+          <div class="prd-module-card">
+            <h4>🛒 模块三：采购订单 (purchase-order)</h4>
+            <ul class="prd-rules-list">
+              <li><strong>建单权限与前提：</strong>仅已批准 (APPROVED) 申请允许采购员创建采购订单；草稿、审批中、已驳回单据均无建单入口。</li>
+              <li><strong>一申请一订单约束 (D05)：</strong>数据库建立 application_id 唯一约束，一个申请单最多生成一个订单；重复点击建单自动拦截并跳转已有订单详情。</li>
+              <li><strong>批准版本快照锁定：</strong>订单明细从批准版本申请快照继承，单价、数量、品名永久锁定，采购员不可篡改。</li>
+              <li><strong>下单推进：</strong>采购员填写供应商（必填自由文本 1–100 字）与预计到货日（不早于下单日）后确认下单，状态推进至待收货 (PENDING_RECEIVE)。</li>
+            </ul>
+          </div>
+
+          <div class="prd-module-card">
+            <h4>📥 模块四：收货登记 (receiving)</h4>
+            <ul class="prd-rules-list">
+              <li><strong>角色专有与职责分离：</strong>仅仓管角色可在待收货/部分收货状态登记到货；采购员无收货入口。</li>
+              <li><strong>按行实收与超收拦截 (D05/D06)：</strong>按明细行录入本次实收数量；校验本次实收数 &le; 待收量；严厉拦截超额收货、负数或小数。</li>
+              <li><strong>分批到货与只读记录：</strong>允许多次分批到货；每次生成只读收货单记录（包含记录号、登记人、时间、各行实收数量）；累计已收量原子累加。</li>
+              <li><strong>订单完成判定：</strong>全部明细行累计已收数量等于订购数量时，订单推进至“已完成”，关闭后续收货入口。</li>
+            </ul>
+          </div>
+
+          <!-- AC01 - AC09 Table -->
+          <h4 style="font-size:14px;margin:20px 0 10px;color:var(--ink);">📋 AC01~AC09 核心验收准则矩阵</h4>
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:70px;">编号</th>
+                  <th style="width:140px;">验收项</th>
+                  <th>通过准则（预期判定标准）</th>
+                  <th style="width:100px;">关联模块</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge-tc-id">AC01</span></td>
+                  <td style="font-weight:600;">草稿暂存与校验</td>
+                  <td>缺标题/用途允许合法草稿暂存，提交全量必填拦截；非法日期/数量/单价格式不保存。</td>
+                  <td>采购申请</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-tc-id">AC02</span></td>
+                  <td style="font-weight:600;">5,000元单级审批</td>
+                  <td>5,000.00 元单主管通过即已批准，不产生财务待办，直接可由采购建单。</td>
+                  <td>审批待办</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-tc-id">AC03</span></td>
+                  <td style="font-weight:600;">高额二级财务复核</td>
+                  <td>5,000.01 元和 8,600.00 元单主管通过后仍不可建单，流转至财务复核，财务通过后才允许建单。</td>
+                  <td>审批待办</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-tc-id">AC04</span></td>
+                  <td style="font-weight:600;">自审拦截与代审</td>
+                  <td>主管本人自审拦截；周禾与许原互为对方本人申请代审并记录审计留痕；方宁本人申请不可提交。</td>
+                  <td>审批待办</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-tc-id">AC05</span></td>
+                  <td style="font-weight:600;">驳回原单重提</td>
+                  <td>驳回必须填写理由；原单重提单号不变，轮次与版本各自增 1，完整重走审批链，旧记录只读留痕。</td>
+                  <td>采购申请</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-tc-id">AC06</span></td>
+                  <td style="font-weight:600;">一申请一订单</td>
+                  <td>未批准不建单；一个批准申请仅生成一个订单；供应商与预计日期缺失不可下单。</td>
+                  <td>采购订单</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-tc-id">AC07</span></td>
+                  <td style="font-weight:600;">分批收货与超收</td>
+                  <td>分批收货允许部分行填数，只增加实际收货行的合法数量；超收与全0提交被拦截；全部行收齐订单已完成。</td>
+                  <td>收货登记</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-tc-id">AC08</span></td>
+                  <td style="font-weight:600;">角色权限隔离</td>
+                  <td>采购与仓管不编辑申请、财务不读订单与收货；按数据范围只读历史，服务端 403 严格防越权。</td>
+                  <td>全局权限</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-tc-id">AC09</span></td>
+                  <td style="font-weight:600;">原型还原与持久化</td>
+                  <td>静态原型刷新还原种子数据；正式业务系统刷新保持持久化数据，两者边界清晰分离。</td>
+                  <td>系统交付</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Panel 2: Test Cases Explorer -->
+        <div id="panel-testcases" class="explorer-panel">
+          <div class="prd-viewer-header">
+            <div>
+              <h3>系统测试用例清单 (全量 27 条测试用例)</h3>
+              <p style="font-size:12px;color:var(--ink-muted);margin-top:2px;">全面覆盖功能走查、金额边界、自审拦截、驳回重提轮次、超额收货与并发冲突</p>
+            </div>
+            <span class="badge-tag">P0 级 18 条 / P1 级 9 条</span>
+          </div>
+
+          <!-- Module Filter Buttons -->
+          <div class="tc-filter-bar">
+            <button type="button" class="tc-filter-btn active" data-filter="all">全部用例 (27)</button>
+            <button type="button" class="tc-filter-btn" data-filter="purchase-request">采购申请 (9)</button>
+            <button type="button" class="tc-filter-btn" data-filter="approval-todo">审批待办 (7)</button>
+            <button type="button" class="tc-filter-btn" data-filter="purchase-order">采购订单 (5)</button>
+            <button type="button" class="tc-filter-btn" data-filter="receiving">收货登记 (6)</button>
+          </div>
+
+          <!-- Test Case Cards List -->
+          <div class="tc-list">
+          <div class="tc-card" data-module="purchase-request">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PR-001</span>
+                <span class="badge-tc-type type-function">FUNCTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购申请 · 新建与草稿</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">必填缺失时保存合法草稿并生成单号、版本1、轮次1</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 以申请人林沐（设计部）登录原型，采购申请列表为空或已有历史单。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 进入采购申请，点击新建。 (2) 标题、用途均留空，期望到货日填今天+7天，明细填：显示器/24寸/台/数量2/单价1800.00。 (3) 点击保存草稿，返回列表并打开该单详情。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 保存成功且不触发必填拦截；生成唯一申请号（SQ 前缀）、版本1、轮次1、状态草稿；总额显示3600.00两位小数；列表按创建时间倒序可见；不产生审批待办。</div>
+          </div>          <div class="tc-card" data-module="purchase-request">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PR-002</span>
+                <span class="badge-tc-type type-exception">EXCEPTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购申请 · 提交校验</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">提交审批执行全量必填校验并进入待主管审批</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 存在 PR-001 生成的草稿单（标题、用途为空，明细合法）。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 打开草稿详情，点击提交审批。 (2) 依次核对标题、用途的报错提示。 (3) 补齐标题「显示器采购」、用途「设计部工位改造」，再次提交。 (4) 以主管周禾登录查看审批待办。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 首次提交被拦截并明确提示标题、用途必填，状态仍为草稿、无待办生成；补齐后提交成功，状态变为待主管审批，周禾待办出现该单；申请人侧编辑与提交入口消失。</div>
+          </div>          <div class="tc-card" data-module="purchase-request">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PR-003</span>
+                <span class="badge-tc-type type-boundary">BOUNDARY</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购申请 · 字段边界</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">日期、数量、单价格式非法不保存，合法边界值可保存</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 以林沐登录，进入新建申请并保持草稿态。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 逐项输入非法值并点保存：数量0、数量1000、单价999999.999（三位小数）、单价1000000.00、期望到货日=昨天、物品名称101字。 (2) 每次保存后检查是否有报错且数据未落库。 (3) 改为边界合法值：数量1、数量999、单价0、单价999999.99、期望到货日=今天、物品名称100字，保存。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 六类非法值均被拦截并提示具体字段，草稿不被写入或该字段保持原值，已填合法内容不丢失；五类边界合法值全部保存成功，单价0.00合法且总额正确，日期等于今天合法。</div>
+          </div>          <div class="tc-card" data-module="purchase-request">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PR-004</span>
+                <span class="badge-tc-type type-function">FUNCTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购申请 · 驳回重提</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">被驳回单修改后重提：单号不变、版本与轮次各加1并重走审批</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 存在已驳回单 SQ-0002，版本1、轮次1，驳回理由与时间线已留痕。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 以原申请人登录，打开该已驳回单，确认可编辑。 (2) 修改用途与一行明细数量，点击提交。 (3) 核对单号、版本、轮次、状态。 (4) 展开审批历史与时间线。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 单号仍为 SQ-0002；版本2、轮次2；状态回到待主管审批并重新从主管开始；旧轮审批记录保留且只读；不沿用上一轮任何通过结果；时间线新增一条重提记录。</div>
+          </div>          <div class="tc-card" data-module="purchase-request">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PR-005</span>
+                <span class="badge-tc-type type-permission">PERMISSION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购申请 · 角色限制</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">财务复核员本人申请只能存草稿，任何金额均不可提交且不产生待办</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 以财务复核员方宁登录。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 新建申请，明细总额 4,500.00，补齐标题、用途、日期后保存草稿。 (2) 点击提交审批，记录提示文案。 (3) 新建另一单总额 8,600.00，重复提交。 (4) 分别以周禾、方宁查看审批待办列表。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 两单草稿均可保存；提交均被拦截：4,500.00 提示「缺少本部门主管，请联系管理员安排人员」，8,600.00 提示「缺少非本人财务复核员，请联系管理员安排人员」；状态保持草稿，主管待办与财务待办均不出现该单，也不存在自助审批路径。</div>
+          </div>          <div class="tc-card" data-module="purchase-request">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PR-006</span>
+                <span class="badge-tc-type type-exception">EXCEPTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购申请 · 状态只读</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P1</span>
+            </div>
+            <div class="tc-card-title">待审批与已批准申请不可编辑、不可撤回，已批准永久只读</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 存在待主管审批单与已批准（已建单）单各一张，申请人为林沐。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 打开待主管审批单详情，查找编辑、保存、提交、撤回入口。 (2) 打开已批准单详情，尝试修改标题与明细。 (3) 对比已建单申请的订单来源字段。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 两单均无编辑、提交、撤回入口；已批准单全部字段只读，订单来源不可改；页面不提供取消/撤销动作；若通过接口强行提交修改应被拒绝且数据不变。</div>
+          </div>          <div class="tc-card" data-module="purchase-request">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PR-007</span>
+                <span class="badge-tc-type type-permission">PERMISSION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购申请 · 数据范围</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P1</span>
+            </div>
+            <div class="tc-card-title">各角色申请可见范围与操作权限隔离</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 种子数据含设计部（林沐）、研发部（陈星）申请及已批准单。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 林沐登录：核对列表仅含本人申请，且不能审批。 (2) 许原（研发主管）登录：核对仅见研发部单及被授权的周禾本人申请，不见设计部普通单。 (3) 苏青（采购员）登录：核对仅可只读已批准申请，无新建/修改/提交按钮。 (4) 白舟（仓管）登录：核对仅见已建单申请的必要关联信息。 (5) 方宁（财务）登录：核对仅见待财务复核单。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 各角色列表与操作入口符合权限矩阵，越权单据不出现或只读；前端隐藏不作为权限证据，需在正式系统补测服务端 403（见 README 分层说明）。</div>
+          </div>          <div class="tc-card" data-module="purchase-request">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PR-008</span>
+                <span class="badge-tc-type type-concurrency">CONCURRENCY</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购申请 · 单号与幂等</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P1</span>
+            </div>
+            <div class="tc-card-title">新建与提交不生成重复单号，重复提交不产生第二张单</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 以林沐登录；正式系统环境（静态原型仅作界面观察）。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 连续新建并保存两张草稿，核对申请号。 (2) 对同一草稿快速双击提交按钮。 (3) 正式系统用两个会话同时提交同一草稿。 (4) 查询申请列表与审批待办数量。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 两张草稿单号不同且唯一；双击只产生一次提交，待办仅 1 条；并发提交时一方成功、另一方返回 409 并提示手动重试，不自动重试、不产生第二张单或第二条待办。</div>
+          </div>          <div class="tc-card" data-module="purchase-request">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PR-009</span>
+                <span class="badge-tc-type type-function">FUNCTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购申请 · 原型与正式系统差异</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P1</span>
+            </div>
+            <div class="tc-card-title">静态原型刷新还原种子数据，正式系统刷新保持已保存数据</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 静态原型与正式系统各一套环境。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 在原型中新建并保存草稿 SQ-0099，页面应显示「刷新恢复合成种子数据」提示。 (2) 刷新浏览器，查看该单是否仍存在。 (3) 在正式系统执行同样的新建保存与刷新。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 原型刷新后 SQ-0099 消失、种子数据恢复原状；正式系统刷新后单据、状态、版本均保留；两项结论分别记录，不得用原型结果推断正式系统持久化能力。</div>
+          </div>          <div class="tc-card" data-module="approval-todo">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">AP-001</span>
+                <span class="badge-tc-type type-boundary">BOUNDARY</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">审批待办 · 金额路由</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">5,000.00元整主管通过即已批准，不生成财务待办</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 存在待主管审批单，总额精确为 5,000.00 元。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 以主管周禾登录，打开审批待办中的该单。 (2) 核对详情金额显示 5000.00 且与明细合计一致。 (3) 点击通过并确认。 (4) 以财务方宁登录查看待办；以采购员苏青登录查看该申请是否可建单。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 主管通过后状态直接为已批准，本轮审批记录仅一条；财务待办列表无该单；采购侧该申请出现建单入口；全流程不出现财务复核环节。</div>
+          </div>          <div class="tc-card" data-module="approval-todo">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">AP-002</span>
+                <span class="badge-tc-type type-boundary">BOUNDARY</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">审批待办 · 金额路由</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">5,000.01元与8,600.00元主管通过后仍需财务复核才可建单</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 存在两张待主管审批单，总额分别 5,000.01 与 8,600.00。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 周禾分别通过两张单，核对状态与财务待办条数。 (2) 以苏青查看这两张申请是否出现建单入口。 (3) 方宁通过 5,000.01 单，核对状态与采购侧建单入口。 (4) 方宁通过 8,600.00 单，重复核对。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 两单主管通过后均为待财务复核，财务待办各一条，采购侧提示未获最终批准、不可建单；财务分别通过后变已批准，此时才出现建单入口；5,000.00 与 5,000.01 路由不同，说明按分比较且无浮点误差。</div>
+          </div>          <div class="tc-card" data-module="approval-todo">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">AP-003</span>
+                <span class="badge-tc-type type-function">FUNCTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">审批待办 · 财务驳回</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">8,600.00元单财务驳回后进入已驳回并保留完整轮次记录</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 8,600.00 元单已由主管通过，状态待财务复核。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 以方宁登录，打开该待办详情。 (2) 填写驳回理由「预算科目不符，请调整用途」并确认驳回。 (3) 查看状态、时间线与审批历史。 (4) 以原申请人登录，确认可修改重提。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 状态变为已驳回；审批历史同时保留主管通过与财务驳回两条记录，含理由、时间、操作人；时间线只读；申请人侧出现编辑与重提入口；采购侧仍不可建单。</div>
+          </div>          <div class="tc-card" data-module="approval-todo">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">AP-004</span>
+                <span class="badge-tc-type type-exception">EXCEPTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">审批待办 · 驳回校验</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">驳回理由为空或超长时停留原状态，1–200字合法</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 存在待主管审批单，主管周禾已打开审批弹窗。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 驳回理由留空，点击确认驳回。 (2) 输入 201 字理由，再次确认。 (3) 输入 1 字「否」确认；另取一张单输入 200 字理由确认。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 空与201字均被拦截并提示理由须 1–200 字，单据保持待主管审批、待办不消失、不写驳回记录；1字与200字驳回成功，状态变已驳回，理由完整显示在时间线。</div>
+          </div>          <div class="tc-card" data-module="approval-todo">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">AP-005</span>
+                <span class="badge-tc-type type-permission">PERMISSION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">审批待办 · 自审拦截</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">主管与财务均不能审批本人申请</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 周禾提交本人申请 4,500.00；方宁存在本人草稿单。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 以周禾登录查看待办，确认本人申请不在其中。 (2) 通过详情直链或残留入口尝试通过该单。 (3) 以方宁登录，尝试对自己提交的单执行财务复核通过。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 周禾待办不出现本人申请；强行点击通过被拦截并提示不能审批本人申请，状态与轮次不变、不写审批记录；方宁对本人单据无通过/驳回动作，且其单据不可提交。</div>
+          </div>          <div class="tc-card" data-module="approval-todo">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">AP-006</span>
+                <span class="badge-tc-type type-permission">PERMISSION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">审批待办 · 代审授权</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">周禾与许原互为对方本人申请代审并留痕，非授权跨部门审批被拒</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 周禾提交本人申请；许原提交本人申请；林沐（设计部申请人）提交一张普通申请。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 以许原登录，确认待办中出现周禾的本人申请，执行通过。 (2) 以周禾登录，确认待办中出现许原的本人申请，执行通过。 (3) 核对两张单审批记录中的操作人与代审标记。 (4) 以许原查看待办，尝试找林沐的设计部普通单并强行审批；以周禾核对同类设计部单据仅本人在待办中。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 两张代审单分别在对方待办出现且可审，记录标注代审及实际操作人；林沐的设计部普通单不出现在许原待办，强行审批被拒绝；代审授权不外溢为普通跨部门审批权，设计部其他单据仍只周禾可审。</div>
+          </div>          <div class="tc-card" data-module="approval-todo">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">AP-007</span>
+                <span class="badge-tc-type type-concurrency">CONCURRENCY</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">审批待办 · 并发与冲突</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P1</span>
+            </div>
+            <div class="tc-card-title">同一待办被并发处理时仅一方成功，另一方409刷新</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 正式系统环境（非静态原型）；存在待主管审批单 8,600.00。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 两个浏览器会话同时打开同一张待办详情。 (2) 会话A先主管通过，会话B随后在同一详情点击通过。 (3) 核对会话B响应、单据状态与审批记录条数。 (4) 换一张单重复：A通过、B驳回。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 正式系统仅一方成功，另一方返回 409 并提示刷新后重试，不自动重试；审批记录只有一条，状态唯一（待财务复核），不出现双通过或通过与驳回并存；原型单浏览器结果不得作为并发结论。</div>
+          </div>          <div class="tc-card" data-module="purchase-order">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PO-001</span>
+                <span class="badge-tc-type type-exception">EXCEPTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购订单 · 建单准入</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">仅已批准申请可建单，草稿、待审批、待财务复核、已驳回均不可建单</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 分别存在草稿、待主管审批、待财务复核、已驳回、已批准五张申请。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 以采购员苏青登录，逐个打开五张申请详情。 (2) 记录每张单是否存在「创建订单」入口及提示。 (3) 对非已批准单通过残留入口或直链尝试建单。 (4) 对已批准单建单成功后核对订单来源申请号。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 前四张无建单入口且强行建单被拒绝，提示需已批准，不产生订单；仅 SQ-0005 可建单，订单来源申请号正确，申请状态仍为已批准。</div>
+          </div>          <div class="tc-card" data-module="purchase-order">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PO-002</span>
+                <span class="badge-tc-type type-exception">EXCEPTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购订单 · 唯一约束</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">一个批准申请最多一个订单，重复建单提示已有订单</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 已批准单 SQ-0005 已建订单 DD-0003（待下单）。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 以苏青登录，再次打开 SQ-0005 详情并点击创建订单。 (2) 记录提示文案与页面跳转。 (3) 核对订单列表中与 SQ-0005 关联的订单条数。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 重复建单被拦截，提示该申请已存在订单 DD-0003 并跳转至该订单详情；订单列表仅一条关联记录；不产生第二张订单、不复制明细快照。</div>
+          </div>          <div class="tc-card" data-module="purchase-order">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PO-003</span>
+                <span class="badge-tc-type type-boundary">BOUNDARY</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购订单 · 下单校验</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">供应商与预计到货日缺失或非法时不能下单</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 存在待下单订单 DD-0003，明细快照已生成。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 供应商留空点击下单。 (2) 供应商填 101 字点击下单。 (3) 供应商填「青岚办公用品商行」，预计到货日填昨天，点击下单。 (4) 改为今天，下单；另测试未来日期下单。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 空供应商与101字均被拦截并提示 1–100 字；日期早于下单日被拦截；订单保持待下单、无下单时间、无收货入口；今天与未来日期下单成功，状态变待收货并生成只读时间线。</div>
+          </div>          <div class="tc-card" data-module="purchase-order">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PO-004</span>
+                <span class="badge-tc-type type-function">FUNCTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购订单 · 快照只读</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P2</span>
+            </div>
+            <div class="tc-card-title">订单明细为批准版本只读快照，采购不可修改</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 已批准单 SQ-0005 明细为 显示器 2×1800.00、扩展坞 2×450.00，已生成订单 DD-0003。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 打开 DD-0003 详情，逐字段核对物品名称、规格、单位、数量、单价、行金额。 (2) 尝试编辑数量、单价与增删行。 (3) 查看订单总额与申请总额。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 明细与批准版本完全一致，字段无可编辑控件、无增删行入口；总额 4500.00 与申请一致；修改请求被拒绝且不改变快照。</div>
+          </div>          <div class="tc-card" data-module="purchase-order">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">PO-005</span>
+                <span class="badge-tc-type type-function">FUNCTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">采购订单 · 状态流转</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P1</span>
+            </div>
+            <div class="tc-card-title">待下单不可收货，下单后进入待收货并展示收货进度</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 订单 DD-0003 处于待下单；仓管白舟已登录。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 以白舟查看待收货列表，确认 DD-0003 不出现、无收货入口。 (2) 以苏青完成下单，填供应商与预计到货日=今天+3。 (3) 以白舟刷新待收货列表，打开 DD-0003 详情。 (4) 核对每行订购数、累计已收 0、待收数与收货进度。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 待下单阶段仓管无收货入口且强行收货被拒绝；下单后订单变待收货并出现在白舟待收货列表，详情显示订购数与待收数，累计已收为0，进度 0/4；订单列表同步展示进度。</div>
+          </div>          <div class="tc-card" data-module="receiving">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">RC-001</span>
+                <span class="badge-tc-type type-function">FUNCTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">收货登记 · 部分行收货</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">部分行填数、其余行空或0时仅生成实际收货行明细</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 订单 DD-0003 待收货：显示器 订购2 累计0 待收2；扩展坞 订购2 累计0 待收2。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 以仓管白舟打开收货登记，显示器本次填 1，扩展坞留空。 (2) 提交并查看订单状态与累计。 (3) 再打开详情核对收货记录内容。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 提交成功；仅显示器行生成收货明细且累计已收变1、待收1；扩展坞累计仍0、不生成明细行；订单状态变部分收货；记录包含记录号、登记人白舟、登记时间与备注。</div>
+          </div>          <div class="tc-card" data-module="receiving">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">RC-002</span>
+                <span class="badge-tc-type type-boundary">BOUNDARY</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">收货登记 · 全0校验</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">所有行均为0或空时提交被拦截且不写记录</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 订单 DD-0004 待收货，含两行，累计已收均为0。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 打开收货登记，两行本次数均留空，提交。 (2) 两行均填 0，再次提交。 (3) 核对订单累计、状态与收货记录条数。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 两次提交均被拦截并提示「至少一行大于0」；不写收货记录、不改累计、状态保持待收货；页面停留在当前表单且提示明确。</div>
+          </div>          <div class="tc-card" data-module="receiving">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">RC-003</span>
+                <span class="badge-tc-type type-boundary">BOUNDARY</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">收货登记 · 数量边界</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">超收、负数、小数与零待收行填数均无效，等于待收量合法</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 订单 DD-0004：显示器 订购2 累计1 待收1；扩展坞 订购2 累计2 待收0。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 显示器本次填 2（超过待收1）提交。 (2) 显示器填 -1 提交；再填 1.5 提交。 (3) 扩展坞待收为0时填 1 提交。 (4) 显示器填 1（正好等于待收量）并提交。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 前四种均被拦截并提示不得超过待收量或须为正整数，不写记录、累计不变；显示器填1提交成功，累计变2、待收0，扩展坞无变化；全部行收齐后订单变已完成。</div>
+          </div>          <div class="tc-card" data-module="receiving">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">RC-004</span>
+                <span class="badge-tc-type type-function">FUNCTION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">收货登记 · 分批收齐</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P0</span>
+            </div>
+            <div class="tc-card-title">两次分批收货收齐后订单已完成且无收货入口、历史只读</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 订单 DD-0005 待收货：显示器 2、扩展坞 2，累计均为0。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 第一次：显示器1、扩展坞2，提交。 (2) 核对状态为部分收货、进度 3/4。 (3) 第二次：显示器1、扩展坞空，提交。 (4) 查看订单状态、详情入口与两条收货记录。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 首批成功后部分收货、累计 1 与 2；次批成功后所有行累计等于订购量，订单变已完成，进度 4/4；已完成订单无收货入口，两条记录只读不可编辑或删除，记录号与登记时间递增。</div>
+          </div>          <div class="tc-card" data-module="receiving">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">RC-005</span>
+                <span class="badge-tc-type type-concurrency">CONCURRENCY</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">收货登记 · 并发超收</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P1</span>
+            </div>
+            <div class="tc-card-title">并发提交同一行时仅一方成功，累计不超过订购量</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 正式系统环境；订单 DD-0006 待收货：显示器 订购2 累计0 待收2。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 两个会话同时打开收货登记，均填显示器本次 2。 (2) 会话A提交成功后，会话B立即提交。 (3) 核对会话B响应、订单累计与收货记录条数。 (4) 再测两会话分别提交 1 的场景。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 正式系统在同一事务内校验剩余量，只有一方成功，另一方返回 409 并提示刷新；累计已收不超过2，记录不重复；两会话各填1时若均成功则累计为2并变已完成，若一方409则累计为1且状态部分收货，两种结果均不得超出订购量。</div>
+          </div>          <div class="tc-card" data-module="receiving">
+            <div class="tc-card-top">
+              <div class="tc-card-tags">
+                <span class="badge-tc-id">RC-006</span>
+                <span class="badge-tc-type type-permission">PERMISSION</span>
+                <span style="font-size:11px;color:var(--ink-muted);font-weight:600;">收货登记 · 权限与数据范围</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:var(--brand);">优先级: P1</span>
+            </div>
+            <div class="tc-card-title">仓管不可建单下单，采购无收货动作，财务不可读订单与收货</div>
+            <div class="tc-detail-row"><strong>前置条件:</strong> 存在待收货订单与已完成订单各一张；已登录各角色账号。</div>
+            <div class="tc-detail-row"><strong>操作步骤:</strong> (1) 以白舟登录：核对无新建订单、下单入口，可登记收货。 (2) 以苏青登录：核对订单详情无收货入口，收货记录只读可见。 (3) 以方宁登录：核对订单列表与收货记录均不可见。 (4) 以林沐登录：核对仅见本人申请关联订单与收货进度的只读信息。</div>
+            <div class="tc-detail-row"><strong>预期结果:</strong> 白舟无建单/下单动作；苏青无收货动作但可查看记录；方宁列表与详情均无订单及收货数据；林沐仅见本人关联进度且只读；正式系统需补测服务端 403，前端隐藏不算通过。</div>
+          </div>
+          </div>
+        </div>
+
+        <!-- Panel 3: TechSpec Explorer -->
+        <div id="panel-techspec" class="explorer-panel">
+          <div class="prd-viewer-header">
+            <div>
+              <h3>研发技术方案 (TechSpec 架构、数据模型与 API 契约)</h3>
+              <p style="font-size:12px;color:var(--ink-muted);margin-top:2px;">包含 9 张 MySQL 核心业务表 DDL、13 个 REST API 接口契约与事务原子保障机制</p>
+            </div>
+            <span class="badge-tag">DDL 9张表 · API 13个</span>
+          </div>
+
+          <div class="techspec-subtabs">
+            <button type="button" class="techspec-subtab-btn active" data-sub="sub-tables">🗄️ 9 张数据表设计</button>
+            <button type="button" class="techspec-subtab-btn" data-sub="sub-apis">🔌 13 个 REST API 契约</button>
+            <button type="button" class="techspec-subtab-btn" data-sub="sub-concurrency">🔒 并发锁与事务机制</button>
+          </div>
+
+          <!-- Subpanel 1: Tables -->
+          <div id="sub-tables" class="techspec-subpanel active">
+              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="badge-tc-id">sys_dept</span>
+                  <span class="api-path">部门表 (预置基础表，无管理界面)</span>
+                </div>
+                <div class="api-desc">主键 id, dept_code (唯一索引 uk_dept_code，如 DESIGN/RD), dept_name, status (1启用/0停用), created_at。</div>
+              </div>
+              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="badge-tc-id">sys_user</span>
+                  <span class="api-path">人员与角色表 (单角色模型)</span>
+                </div>
+                <div class="api-desc">主键 id, username (唯一), display_name, credential_digest (强哈希), dept_id (FK sys_dept.id), role_code (APPLICANT/MANAGER/FINANCE/BUYER/WAREHOUSE), can_delegate_approve (仅周禾/许原为1)。</div>
+              </div>
+              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="badge-tc-id">pr_application</span>
+                  <span class="api-path">采购申请主表 (状态与审批唯一载体)</span>
+                </div>
+                <div class="api-desc">主键 id, apply_no (唯一索引 uk_apply_no，如 SQ20261019000001), applicant_id, dept_id, title, purpose, total_amount_cents, status (DRAFT/PENDING_MANAGER/PENDING_FINANCE/APPROVED/REJECTED), version, round_no, row_version (乐观锁版本号)。</div>
+              </div>
+              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="badge-tc-id">pr_application_item</span>
+                  <span class="api-path">采购申请明细表 (草稿可改，提交后随单只读)</span>
+                </div>
+                <div class="api-desc">主键 id, application_id (FK pr_application.id), line_no (行号), item_name, spec, unit (台/个/件), quantity (1-999整数), unit_price_cents (单价分), line_amount_cents (行总额分)。</div>
+              </div>
+              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="badge-tc-id">pr_approval_record</span>
+                  <span class="api-path">审批记录表 (只增不改，时间线数据源)</span>
+                </div>
+                <div class="api-desc">主键 id, application_id, approver_id, step_code (MANAGER/FINANCE), action (PASS/REJECT), comment (驳回理由 1-200 字), round_no (审批轮次), is_delegated (代审标记), delegate_for_user_id (被代审人), approved_at。</div>
+              </div>
+              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="badge-tc-id">po_order</span>
+                  <span class="api-path">采购订单主表 (一申请最多一单，快照固化)</span>
+                </div>
+                <div class="api-desc">主键 id, order_no (唯一索引 uk_order_no，如 DD20261019000001), application_id (唯一约束 uk_application_id 严格防重复建单), buyer_id, supplier_name, status (PENDING_ORDER/PENDING_RECEIVE/PARTIAL_RECEIVED/COMPLETED), ordered_at。</div>
+              </div>
+              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="badge-tc-id">po_order_item</span>
+                  <span class="api-path">订单行快照与收货累计 (并发防超收核心表)</span>
+                </div>
+                <div class="api-desc">主键 id, order_id, line_no, item_name, spec, unit, order_quantity, received_quantity (累计已收量，原子累加), unit_price_cents, row_version (乐观锁版本号)。</div>
+              </div>
+              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="badge-tc-id">rc_receipt</span>
+                  <span class="api-path">收货记录头 (每次登记一条，只增不改)</span>
+                </div>
+                <div class="api-desc">主键 id, receipt_no (唯一索引 uk_receipt_no，如 SH20261019000001), order_id, warehouse_operator_id, received_at。</div>
+              </div>
+              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="badge-tc-id">rc_receipt_item</span>
+                  <span class="api-path">收货明细 (仅记录本次实际收货行，空/0不落库)</span>
+                </div>
+                <div class="api-desc">主键 id, receipt_id, order_item_id, receive_quantity (正整数且不超过对应行待收量), remark。</div>
+              </div>
+          </div>
+
+          <!-- Subpanel 2: APIs -->
+          <div id="sub-apis" class="techspec-subpanel">
+              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-get">GET</span>
+                  <span class="api-path">/api/v1/purchase-requests</span>
+                </div>
+                <div class="api-desc">采购申请分页列表；按角色确定数据范围（申请人=本人，主管=本部门，财务=待复核及历史且不含订单信息，采购=已批准，仓管=已建单）</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-post">POST</span>
+                  <span class="api-path">/api/v1/purchase-requests</span>
+                </div>
+                <div class="api-desc">新建申请草稿；草稿允许必填缺失，但已填字段格式必须合法；服务端生成申请号、version=1、round_no=1</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-get">GET</span>
+                  <span class="api-path">/api/v1/purchase-requests/{id}</span>
+                </div>
+                <div class="api-desc">申请详情聚合读：主表、行明细、全部审批轮次、只读时间线、订单与累计收货进度（财务角色整体省略订单段）</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-put">PUT</span>
+                  <span class="api-path">/api/v1/purchase-requests/{id}</span>
+                </div>
+                <div class="api-desc">编辑草稿或已驳回单；整组替换行明细；单号、版本、轮次不变</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-post">POST</span>
+                  <span class="api-path">/api/v1/purchase-requests/{id}/submit</span>
+                </div>
+                <div class="api-desc">提交审批：全量必填校验 + 金额重算 + 路由到主管待办；被驳回单重提沿用单号，version 与 round_no 各 +1</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-get">GET</span>
+                  <span class="api-path">/api/v1/approvals/todo</span>
+                </div>
+                <div class="api-desc">审批待办分页列表；主管看本部门 PENDING_MANAGER（排除本人申请），财务看跨部门 PENDING_FINANCE（排除本人申请），同一模块按角色返回</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-post">POST</span>
+                  <span class="api-path">/api/v1/approvals/{applicationId}/decision</span>
+                </div>
+                <div class="api-desc">审批决策（通过/驳回）；事务内校验归属性、自审、理由，条件更新状态并写审批记录；≤5000.00 元主管通过即批准，>5000.00 元进入财务复核</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-get">GET</span>
+                  <span class="api-path">/api/v1/purchase-orders</span>
+                </div>
+                <div class="api-desc">订单分页列表；采购看全部，仓管只看待收货/部分收货，申请人/主管只看本人或本部门申请关联订单，财务 403</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-post">POST</span>
+                  <span class="api-path">/api/v1/purchase-orders</span>
+                </div>
+                <div class="api-desc">在已批准申请上创建订单：校验状态与唯一性，复制批准版本行快照，状态 PENDING_ORDER，不修改申请状态</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-get">GET</span>
+                  <span class="api-path">/api/v1/purchase-orders/{id}</span>
+                </div>
+                <div class="api-desc">订单详情：快照行（订购数/累计已收/待收）、只读时间线、收货历史与本次可收数量；收货表单数据由本接口提供</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-post">POST</span>
+                  <span class="api-path">/api/v1/purchase-orders/{id}/place</span>
+                </div>
+                <div class="api-desc">下单：填供应商与预计到货日，校验后状态 PENDING_ORDER → PENDING_RECEIVE，写 ordered_at</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-post">POST</span>
+                  <span class="api-path">/api/v1/purchase-orders/{id}/receipts</span>
+                </div>
+                <div class="api-desc">收货登记：按行提交本次到货量，空/0 行忽略，全 0 拦截，逐行条件累加防超收，同一事务写收货头/明细并推进订单状态</div>
+              </div>              <div class="api-contract-card">
+                <div class="api-contract-header">
+                  <span class="http-method method-get">GET</span>
+                  <span class="api-path">/api/v1/session/me</span>
+                </div>
+                <div class="api-desc">当前会话：返回用户、角色、部门与前端可用的能力开关（仅用于界面渲染，服务端仍独立鉴权）</div>
+              </div>
+          </div>
+
+          <!-- Subpanel 3: Concurrency & Transaction -->
+          <div id="sub-concurrency" class="techspec-subpanel">
+            <div class="prd-module-card">
+              <h4>1. 乐观锁状态与版本条件更新 (防审批并发冲突)</h4>
+              <p style="font-size:13px;color:var(--ink-secondary);line-height:1.6;">
+                针对审批待办多人同时点击批准/驳回，正式业务系统采用基于 <code>status</code> 与 <code>row_version</code> 的条件更新，更新受影响行数不为 1 时立即回滚并返回 HTTP 409 Conflict：
+              </p>
+              <div class="sql-snippet">
+UPDATE pr_application
+SET status = 'APPROVED', row_version = row_version + 1, updated_at = NOW()
+WHERE id = ? AND status = 'PENDING_MANAGER' AND row_version = ?;
+              </div>
+            </div>
+
+            <div class="prd-module-card">
+              <h4>2. 事务内原子累加防超收 SQL (核心收货安全)</h4>
+              <p style="font-size:13px;color:var(--ink-secondary);line-height:1.6;">
+                针对分批收货与多次到货并发场景，在单事务内执行原子条件累加校验，确保无论如何并发，累计已收数量绝不可能超过订购数量：
+              </p>
+              <div class="sql-snippet">
+-- 单条 SQL 在行锁内完成原子校验累加，返回更新行数为 0 则抛出超收异常整单回滚
+UPDATE po_order_item
+SET received_quantity = received_quantity + ?, row_version = row_version + 1
+WHERE id = ? AND (received_quantity + ?) <= order_quantity;
+              </div>
+            </div>
+
+            <div class="prd-module-card">
+              <h4>3. 一申请一订单唯一约束 (防重复下单)</h4>
+              <p style="font-size:13px;color:var(--ink-secondary);line-height:1.6;">
+                在采购订单主表 <code>po_order</code> 上对 <code>application_id</code> 建立 UNIQUE 唯一索引 <code>uk_application_id</code>，从数据库物理层杜绝因网络重试或双击产生第二张订单。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 4: Estimate Explorer -->
+        <div id="panel-estimate" class="explorer-panel">
+          <div class="prd-viewer-header">
+            <div>
+              <h3>工作量评估与报价明细表 (12 项研发工时细化拆解)</h3>
+              <p style="font-size:12px;color:var(--ink-muted);margin-top:2px;">基准：1 名中级全栈（或 1 前端 + 1 后端）在需求冻结下的净开发与自测工时，排除第三方接口与非研发开销</p>
+            </div>
+            <span class="badge-tag">开发 40.5 人天 · 自测 22 人天</span>
+          </div>
+
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:50px;">序号</th>
+                  <th style="width:90px;">一级模块</th>
+                  <th style="width:110px;">二级模块</th>
+                  <th style="width:70px;">类型</th>
+                  <th style="width:150px;">页面/接口名称</th>
+                  <th style="width:70px;">复杂度</th>
+                  <th style="width:80px;">开发(天)</th>
+                  <th style="width:80px;">自测(天)</th>
+                  <th>测算依据与范围说明</th>
+                </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td style="font-weight:700;">1.0</td>
+                <td>采购申请</td>
+                <td>申请列表与详情</td>
+                <td><span class="badge-tc-id" style="background:#374151;">页面</span></td>
+                <td style="font-weight:600;">申请列表与详情页</td>
+                <td>中</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">3.0</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">1.5</td>
+                <td style="font-size:12px;">Vue 3 页面：申请列表展示申请号、标题、申请人、部门、总额、状态、创建时间与详情入口，创建时间倒序、10 条/页、单号/标题搜索、状态筛选与「暂无匹配单据」空状态；详情页展示申请字段、行明细、全部审批轮次、只读操作时间线，并关联订单号与累计收货进度。含按角色隐藏操作按钮（仅界面层，不作为权限依据）。</td>
+              </tr>              <tr>
+                <td style="font-weight:700;">2.0</td>
+                <td>采购申请</td>
+                <td>新建与编辑</td>
+                <td><span class="badge-tc-id" style="background:#374151;">页面</span></td>
+                <td style="font-weight:600;">申请新建/编辑表单页</td>
+                <td>中高</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">3.5</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">1.5</td>
+                <td style="font-size:12px;">多行物品明细表单：标题 1–100 字、用途 1–500 字、期望到货日不早于当天、物品名称/规格/单位、数量 1–999 整数、单价 0–999999.99 两位小数、行金额与总额按分实时汇总展示。草稿允许缺失必填但已填项格式必须合法，提交时才做全量必填校验；支持编辑草稿与已驳回单，已提交/已批准状态整单只读。</td>
+              </tr>              <tr>
+                <td style="font-weight:700;">3.0</td>
+                <td>采购申请</td>
+                <td>保存与提交</td>
+                <td><span class="badge-tc-id" style="background:#374151;">内部接口</span></td>
+                <td style="font-weight:600;">申请保存与提交接口</td>
+                <td>中高</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">3.5</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">2.0</td>
+                <td style="font-size:12px;">POST/PUT 申请草稿保存与提交：首次保存生成唯一申请号（前缀 SQ，唯一约束 + 冲突 409，不自动重试），初始化版本 1、轮次 1；提交执行全量必填与格式校验，金额以分（BigDecimal/整分）计算行金额与汇总，通过后状态置为待主管审批并进入待办池。草稿不触发审批，提交后申请人不可编辑或撤回。</td>
+              </tr>              <tr>
+                <td style="font-weight:700;">4.0</td>
+                <td>采购申请</td>
+                <td>驳回重提与查询</td>
+                <td><span class="badge-tc-id" style="background:#374151;">内部接口</span></td>
+                <td style="font-weight:600;">申请重提、列表与详情查询接口</td>
+                <td>中</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">3.5</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">1.5</td>
+                <td style="font-size:12px;">GET 列表/详情/时间线按角色数据范围过滤（申请人仅本人、主管本部门或授权代审、采购仅已批准、仓管仅已建单关联必要信息，越权返回 403，不依赖前端隐藏）；已驳回单重提沿用原单号、版本与审批轮次各 +1、从主管重新走完整两级审批，上一轮审批记录与驳回理由只读保留，不沿用旧通过结果。</td>
+              </tr>              <tr>
+                <td style="font-weight:700;">5.0</td>
+                <td>审批待办</td>
+                <td>待办与审核详情</td>
+                <td><span class="badge-tc-id" style="background:#374151;">页面</span></td>
+                <td style="font-weight:600;">审批待办列表与审核详情页</td>
+                <td>中</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">3.0</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">1.5</td>
+                <td style="font-size:12px;">同一模块按当前角色呈现主管待办或财务复核待办；审核详情展示申请头、用途、行明细、总额、当前轮次与历史审批记录。通过/驳回均需二次确认弹窗，驳回理由 1–200 字必填且缺失时停留原状态并提示；展示代审标识与自审禁用态。</td>
+              </tr>              <tr>
+                <td style="font-weight:700;">6.0</td>
+                <td>审批待办</td>
+                <td>审批决策</td>
+                <td><span class="badge-tc-id" style="background:#374151;">内部接口</span></td>
+                <td style="font-weight:600;">审批决策接口（金额边界与并发）</td>
+                <td>高</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">4.0</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">2.5</td>
+                <td style="font-size:12px;">主管/财务通过或驳回：主管通过时按分为单位比较，总额 ≤5000.00 元直接已批准，>5000.00 元（含 5000.01、8600.00）转待财务复核，财务通过后才已批准；驳回统一到已驳回并强制理由落库。拦截本人审批，代审仅限周禾/许原对对方本人申请并写审批留痕。事务内以状态 + 版本条件更新，重复或竞争动作返回 409 并提示刷新。</td>
+              </tr>              <tr>
+                <td style="font-weight:700;">7.0</td>
+                <td>审批待办</td>
+                <td>待办查询</td>
+                <td><span class="badge-tc-id" style="background:#374151;">内部接口</span></td>
+                <td style="font-weight:600;">待办查询接口</td>
+                <td>中低</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">2.0</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">1.0</td>
+                <td style="font-size:12px;">GET 当前角色可见待办：主管按本部门待主管审批 + 明确授权代审单，财务按跨部门待财务复核且排除本人申请，附带分页、金额与轮次信息；同时返回审批历史与上一轮驳回理由供审核详情渲染，杜绝越权与重复待办。</td>
+              </tr>              <tr>
+                <td style="font-weight:700;">8.0</td>
+                <td>采购订单</td>
+                <td>订单列表与详情</td>
+                <td><span class="badge-tc-id" style="background:#374151;">页面</span></td>
+                <td style="font-weight:600;">订单列表与详情页</td>
+                <td>中</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">2.5</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">1.5</td>
+                <td style="font-size:12px;">订单列表展示订单号、关联申请号、供应商、金额、状态（待下单/待收货/部分收货/已完成）、创建时间与收货进度；详情展示批准版本物品数量单价只读快照、只读时间线与收货记录摘要。采购员与仓管可见范围按角色区分，申请人仅可读本人关联订单。</td>
+              </tr>              <tr>
+                <td style="font-weight:700;">9.0</td>
+                <td>采购订单</td>
+                <td>建单与下单</td>
+                <td><span class="badge-tc-id" style="background:#374151;">页面</span></td>
+                <td style="font-weight:600;">建单与下单表单页</td>
+                <td>中</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">2.5</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">1.0</td>
+                <td style="font-size:12px;">采购员从已批准申请发起建单，展示不可编辑的物品/数量/单价快照；填写供应商（自由文本 1–100 字、无供应商主数据）与预计到货日（不早于下单日）后确认下单。重复建单在界面上引导跳转已有订单，未下单订单不出现收货入口。</td>
+              </tr>              <tr>
+                <td style="font-weight:700;">10.0</td>
+                <td>采购订单</td>
+                <td>订单接口</td>
+                <td><span class="badge-tc-id" style="background:#374151;">内部接口</span></td>
+                <td style="font-weight:600;">订单创建与下单接口</td>
+                <td>高</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">4.0</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">2.0</td>
+                <td style="font-size:12px;">创建订单：仅已批准申请可建，生成订单号（前缀 DD），物品数量单价按批准版本固化快照；以「申请 ID 唯一约束」保证一个申请最多一个订单，重复请求返回已有订单或 409，不产生第二张；非采购角色 403。下单：校验供应商必填与预计到货日不早于下单日，状态待下单→待收货并记录时间线；不提供编辑已下单订单、取消或付款。</td>
+              </tr>              <tr>
+                <td style="font-weight:700;">11.0</td>
+                <td>收货登记</td>
+                <td>收货登记页</td>
+                <td><span class="badge-tc-id" style="background:#374151;">页面</span></td>
+                <td style="font-weight:600;">收货登记与记录详情页</td>
+                <td>中高</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">3.5</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">2.0</td>
+                <td style="font-size:12px;">仓管仅对待收货/部分收货订单进入登记页；每行显示订购数、累计已收、待收与本次数，未参与行可空或 0 且不生成明细，至少一行大于 0；前端对负值、小数、超待收即时提示但仍以服务端结果为准；提交后展示本次记录号、登记人、时间、各行数量与备注，历史记录只读，无退货/撤销入口，待下单与已完成无入口。</td>
+              </tr>              <tr>
+                <td style="font-weight:700;">12.0</td>
+                <td>收货登记</td>
+                <td>收货事务</td>
+                <td><span class="badge-tc-id" style="background:#374151;">内部接口</span></td>
+                <td style="font-weight:600;">收货提交事务接口</td>
+                <td>高</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">4.5</td>
+                <td style="font-family:var(--font-mono);font-weight:700;">3.0</td>
+                <td style="font-size:12px;">单事务内完成：校验订单状态为待收货/部分收货、本次数量为正整数且不超过当前待收量、至少一行大于 0，按行写收货明细并累加已收数量，再推进状态（存在未收齐行→部分收货；全部行累计等于订购量→已完成），任一行非法整单回滚不写记录不改累计。并发或重复提交导致剩余量变化时返回 409 提示刷新，不做自动重试；仅仓管角色可调用，采购员 403。</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- Download Box -->
       <div class="download-box">
         <h3>📦 一键下载案例全套交付包</h3>

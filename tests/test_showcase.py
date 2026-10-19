@@ -45,6 +45,15 @@ class ShowcaseStationTests(unittest.TestCase):
         self.assertIn("deliverables.zip", content)
         self.assertIn("TechSpec", content)
         self.assertIn("测试用例", content)
+        self.assertIn("deliverables-explorer", content)
+        self.assertIn("panel-prd", content)
+        self.assertIn("panel-testcases", content)
+        self.assertIn("panel-techspec", content)
+        self.assertIn("panel-estimate", content)
+        self.assertIn("PO-001", content)
+        self.assertIn("po_order", content)
+        self.assertIn("AC01", content)
+
 
     def test_prototype_iframe_sandbox_security(self):
         html_path = SHOWCASE_DIR / "index.html"
