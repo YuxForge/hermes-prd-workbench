@@ -18,7 +18,7 @@
 
 Hermes PRD Workbench is an Apache-2.0 self-hosted workspace for product and engineering teams. Upload source material once, preserve the original Agent result, refine a separate working draft, and continue from the same context into reviews and downstream deliverables.
 
-Version **0.4.0-beta.2** is a fresh-install preview for a single instance on a local or trusted network. It has been validated on macOS arm64 and Windows 11 WSL2 with Docker Desktop Linux containers. Linux amd64 and native Windows deployments have not yet been declared supported.
+Version **0.5.0-beta.1** is a fresh-install preview featuring an independent Online Requirement Review workspace, precise line-anchored annotations, WeChat-style dialogue, and Mermaid diagram vector rendering. It has been validated on macOS arm64 and Windows 11 WSL2 with Docker Desktop Linux containers. Linux amd64 and native Windows deployments have not yet been declared supported.
 
 ## A concrete example: resolve a purchasing-rule conflict
 

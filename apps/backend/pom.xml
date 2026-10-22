@@ -13,7 +13,7 @@
 
     <groupId>org.hermesprd</groupId>
     <artifactId>prd-control-plane</artifactId>
-    <version>0.4.0-beta.2</version>
+    <version>0.5.0-beta.1</version>
     <name>prd-control-plane</name>
     <description>Spike control plane for Hermes PRD review and generation</description>
 

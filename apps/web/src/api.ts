@@ -244,7 +244,7 @@ export type AuthPayload = {
   user: User;
 };
 
-const client = axios.create({ baseURL: "/api/v1", timeout: 30000 });
+export const client = axios.create({ baseURL: "/api/v1", timeout: 30000 });
 
 client.interceptors.request.use((config) => {
   const token = getToken();
@@ -274,7 +274,12 @@ client.interceptors.response.use(
     if (status === 401 && !url.includes("/auth/login") && !url.includes("/auth/register")) {
       clearSession();
       if (!window.location.pathname.startsWith("/login")) {
-        window.location.assign("/login");
+        const redirect = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+        const params = new URLSearchParams();
+        if (redirect.startsWith("/") && !redirect.startsWith("//")) {
+          params.set("redirect", redirect);
+        }
+        window.location.assign(params.size > 0 ? `/login?${params.toString()}` : "/login");
       }
     }
     return Promise.reject(error);

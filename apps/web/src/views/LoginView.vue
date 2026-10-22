@@ -99,7 +99,14 @@ async function submit() {
         ? await loginAccount(username.value.trim(), password.value)
         : await registerAccount(username.value.trim(), password.value, displayName.value.trim());
     saveSession(payload.token, payload.user);
-    await router.replace("/");
+    const rawRedirect = String(router.currentRoute.value.query.redirect || "");
+    const safeRedirect =
+      rawRedirect.startsWith("/") &&
+      !rawRedirect.startsWith("//") &&
+      !rawRedirect.startsWith("/login")
+        ? rawRedirect
+        : "/";
+    await router.replace(safeRedirect);
   } catch (err) {
     error.value = apiErrorMessage(err);
   } finally {

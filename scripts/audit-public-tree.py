@@ -68,7 +68,7 @@ def archive_text(raw, office=False, budget=None):
     return '\n'.join(texts)
 
 
-EXCLUDED_PARTS = {"__pycache__", "node_modules", "target", ".venv", "dist", "coverage", ".runtime", "logs", "backups", ".DS_Store"}
+EXCLUDED_PARTS = {"__pycache__", "node_modules", "target", ".venv", "dist", "coverage", ".runtime", "logs", "backups", ".DS_Store", "artifacts"}
 SOURCE_NAME_EXCEPTIONS = {
     "apps/backend/src/main/java/org/hermesprd/workbench/auth/Credentials.java",
     "apps/backend/src/test/java/org/hermesprd/workbench/auth/CredentialsTest.java",

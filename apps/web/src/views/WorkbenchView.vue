@@ -5,6 +5,20 @@
         <strong>PRD 工作台</strong>
         <span class="brand-sub-badge">{{ CURRENT_UPDATE_LOG.version.toLowerCase() }}</span>
       </a>
+
+      <!-- Primary Module Navigation -->
+      <nav class="primary-module-nav" aria-label="工作台主功能模块导航">
+        <router-link to="/" class="primary-nav-tab active">
+          <Layers :size="14" />
+          <span>PRD 工作台</span>
+        </router-link>
+        <router-link to="/reviews" class="primary-nav-tab review-tab">
+          <CheckSquare :size="14" />
+          <span>线上评审</span>
+          <span class="nav-badge-pill">协同</span>
+        </router-link>
+      </nav>
+
       <div class="topbar-spacer"></div>
       <div
         class="system-health-badge"
@@ -120,24 +134,41 @@
           </div>
           <p v-if="!tasks.length" class="history-empty">还没有需求，点新建开始。</p>
           <div v-else class="task-card-list">
-            <button
+            <div
               v-for="item in displayedTasks"
               :key="item.id"
-              type="button"
-              class="task-card-item"
+              class="task-card-item-wrap"
               :class="{ active: item.id === taskId }"
-              :title="item.title"
-              @click="pickTask(item.id)"
             >
-              <span class="task-card-name">{{ item.title }}</span>
-              <div class="task-card-meta-row">
-                <span class="task-card-meta">{{ formatTime(item.createdAt) }}</span>
-                <span v-if="taskRunningMap[item.id]" class="task-card-status-badge">
-                  <Loader2 :size="10" class="spinning" />
-                  {{ runningModeLabel(taskRunningMap[item.id].mode) }}中
-                </span>
-              </div>
-            </button>
+              <button
+                type="button"
+                class="task-card-item"
+                :title="item.title"
+                @click="(item as any).isSharedReview ? openOnlineReview(item.id) : pickTask(item.id)"
+              >
+                <span class="task-card-name">{{ item.title }}</span>
+                <div class="task-card-meta-row">
+                  <span class="task-card-meta">{{ formatTime(item.createdAt) }}</span>
+                  <span v-if="taskRunningMap[item.id]" class="task-card-status-badge">
+                    <Loader2 :size="10" class="spinning" />
+                    {{ runningModeLabel(taskRunningMap[item.id].mode) }}中
+                  </span>
+                  <span v-else-if="(item as any).isSharedReview" class="shared-review-tag">
+                    受邀协作
+                  </span>
+                </div>
+              </button>
+              <button
+                class="task-review-badge-btn"
+                type="button"
+                title="进入该需求的线上评审工作区"
+                aria-label="进入线上评审"
+                @click.stop="openOnlineReview(item.id)"
+              >
+                <CheckSquare :size="11" />
+                <span>线上评审</span>
+              </button>
+            </div>
           </div>
           <!-- 隐式兼容 taskPickerEl 和 taskSearchInput -->
           <div v-show="false" ref="taskPickerEl">
@@ -2470,6 +2501,7 @@ import {
   updateDraftSource,
   updateReviewFeedback,
 } from "../api";
+import { fetchReviewTasks } from "../reviewApi";
 import { itemList, issueDetail, issueTitle, renderMarkdown, renderMarkdownWithAnchors, stripDuplicateLeadingHeading } from "../markdown";
 import { downloadBlob, downloadDocx, downloadHtml, downloadMarkdown, DEMO_PREVIEW_SANDBOX, createDemoPreviewUrl, createSandboxedDemoHtml, inlineStaticPocHtml, buildFallbackDemoScript } from "../exportDoc";
 import { buildDemoPackageZip, normalizeDemoPackageFiles, packageRootName, type DemoPackageFile } from "../demoPackage";
@@ -3653,6 +3685,9 @@ const runButtonLabel = computed(() => {
 
 onMounted(async () => {
   updateLogSeen.value = localStorage.getItem(updateLogSeenKey(user.value?.id || user.value?.username)) === CURRENT_UPDATE_LOG.version;
+  if (!updateLogSeen.value) {
+    updateLogOpen.value = true;
+  }
   const savedMode = localStorage.getItem(storageKey("mode"));
   mode.value = savedMode === "REVIEW" || savedMode === "DEMO" || savedMode === "POC" || savedMode === "ESTIMATE" || savedMode === "TEST_CASE" || savedMode === "TECH_SPEC" ? savedMode : "GENERATE";
   historyFilter.value = "ALL";
@@ -4481,10 +4516,33 @@ async function loadQualityOptions() {
 
 async function refreshTasks() {
   try {
-    tasks.value = await listTasks();
+    const myTasks = await listTasks();
+    const merged: (TaskSummary & { isSharedReview?: boolean })[] = [...myTasks];
+    try {
+      const reviewResp = await fetchReviewTasks();
+      if (reviewResp && reviewResp.items) {
+        for (const item of reviewResp.items) {
+          if (!merged.some((t) => t.id === item.taskId)) {
+            merged.push({
+              id: item.taskId,
+              title: item.title,
+              createdAt: item.createdAt,
+              isSharedReview: true,
+            });
+          }
+        }
+      }
+    } catch {
+      // ignore review tasks fetch failure
+    }
+    tasks.value = merged;
   } catch {
     tasks.value = [];
   }
+}
+
+function openOnlineReview(targetTaskId: string) {
+  router.push(`/reviews/${targetTaskId}`);
 }
 
 async function refreshHistory() {

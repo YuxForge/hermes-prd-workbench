@@ -13,7 +13,7 @@
 
 可自托管的 PRD 工作台，以 [Hermes Agent](https://github.com/NousResearch/hermes-agent) 为推理核心。支持材料上传、PRD 生成与编辑、评审、HTML Demo、静态 POC、工作量估算、测试用例、技术方案与导出。
 
-版本 0.4.0-beta.2 开源预览版。面向本地或可信网络中的单实例使用。仅支持全新安装；已验收 macOS arm64 和 Windows 11 WSL2 + Docker Desktop Linux 容器，Linux 原生与原生 Windows 尚未声明支持。此项目独立于 Hermes 上游；不提供公共 SaaS、多租户、高可用或自动恢复承诺。模型输出与工作量估算需要人工判断。
+版本 0.5.0-beta.1 开源预览版。全面上线独立「需求线上评审」协同中心、划词精准锚定行号、全量 Markdown 富文本与 Mermaid 矢量流程图渲染、微信气泡沟通流、未读消息与待办自动清零、一键确认极简解决闭环。面向本地或可信网络中的单实例使用。仅支持全新安装；已验收 macOS arm64 和 Windows 11 WSL2 + Docker Desktop Linux 容器，Linux 原生与原生 Windows 尚未声明支持。此项目独立于 Hermes 上游；不提供公共 SaaS、多租户、高可用或自动恢复承诺。模型输出与工作量估算需要人工判断。
 
 ## 一个具体案例：采购额度冲突，研发应该按哪版做？
 

@@ -53,3 +53,19 @@ The author completed Windows 11 WSL2 browser acceptance and confirmed Mermaid fl
 The public home now has an English README with a Chinese entry point, screenshots and an animated walkthrough made only from synthetic acceptance data. A generated brand illustration is used solely as the repository social card and is not presented as a product screenshot. Binary public media is restricted by exact path, file signature, size and metadata checks in the release audit. GitHub Discussions, roadmap issues, expanded topics and a latest-release homepage provide public support and contribution entry points.
 
 Testing the reproducible source snapshot exposed an epoch-timestamp interaction in Maven's incremental resource copy: Java compiled, but Markdown Skill resources could be omitted from a fresh target when their archived mtime was zero. The backend build now explicitly overwrites resources, and the standard check starts with a clean target. The extracted release archive is rebuilt and tested before publication.
+
+## 0.5.0-beta.1 release and online requirement review
+
+The author authorized the v0.5.0-beta.1 preview introducing the complete collaborative **Online Requirement Review (需求线上评审)** subsystem on 2026-10-22.
+
+Key deliverables:
+1. Independent review workspace and document reader with multi-revision baseline diffs, 4-tier project role-based access control (OWNER, EDITOR, REVIEWER, VIEWER), and audit export.
+2. User fuzzy search autocomplete dropdown for assigning issue owners and adding workspace members by username or display name.
+3. Precise document text selection and physical line mapping algorithm based on prefix/suffix text anchors, with live Markdown preview in question submission.
+4. WeChat-style conversational dialogue cards with left/right speech bubbles, timestamps, avatars, and celebration milestone markers.
+5. Streamlined resolution lifecycle: maintainer replies auto-transition issues to Awaiting Confirmation; reporter-exclusive "Resolved" and "Cancel" buttons; reminder nudge mechanism for pending questions.
+6. Auto-clear closure of unread notifications and pending task counters upon issue view, reply, or resolution; Flyway migration V017 cleans up legacy stale unread notifications.
+7. Full Mermaid vector flowchart and sequence diagram rendering with diagram keyword detection and responsive SVG containers.
+8. Decoupled physical foreign keys across review database tables (Flyway migration V016) to conform to high-concurrency enterprise architectural standards.
+
+Validation passed: 24 frontend test files (99/99 passed), Vue TypeScript checks (0 errors), OpenAPI contract tests (4/4 passed), Playwright browser acceptance tests, security audit (0 findings), and documentation checks.

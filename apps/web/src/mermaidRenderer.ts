@@ -20,7 +20,14 @@ export async function renderMermaidInContainer(container: HTMLElement | null): P
   }
   initMermaid();
 
-  const codeBlocks = container.querySelectorAll<HTMLElement>("code.language-mermaid");
+  const allCodes = Array.from(container.querySelectorAll<HTMLElement>("pre > code"));
+  const codeBlocks = allCodes.filter((codeEl) => {
+    if (codeEl.classList.contains("language-mermaid") || codeEl.classList.contains("lang-mermaid")) {
+      return true;
+    }
+    const text = (codeEl.textContent || "").trim();
+    return /^(?:graph\s|flowchart\s|sequenceDiagram|stateDiagram|classDiagram|erDiagram|gantt|pie\s|journey|gitGraph|mindmap|quadrantChart)/m.test(text);
+  });
   if (!codeBlocks || codeBlocks.length === 0) {
     return;
   }

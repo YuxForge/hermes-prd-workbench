@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Hermes PRD Workbench API
-  version: 0.4.0-beta.2
+  version: 0.5.0-beta.1
   description: Minimal local single-user contract for validating an editable PRD, review decisions, Demo generation, workload estimation, test case generation, and technical solution breakdown through real Hermes. Compose browser requests use relative /api/v1 paths on the Web origin; the reverse proxy must preserve Host including its port. Untrusted cross-origin requests remain rejected.
 servers:
   - url: http://127.0.0.1:18100
@@ -15,6 +15,7 @@ tags:
   - name: HermesTools
   - name: UpdateLogs
   - name: AdminAnalytics
+  - name: Review
 paths:
   /api/v1/telemetry/events:
     post:
@@ -929,6 +930,1067 @@ paths:
           $ref: '#/components/responses/Conflict'
         '413':
           $ref: '#/components/responses/PayloadTooLarge'
+  /api/v1/review/tasks:
+    get:
+      tags: [Review]
+      operationId: getReviewTasks
+      summary: List review spaces the user has access to
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: pageSize
+          in: query
+          required: false
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          description: Paginated review task summaries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewTaskListResponse'
+        '401':
+  /api/v1/review/tasks/{taskId}/candidate-users:
+    get:
+      tags: [Review]
+      operationId: searchReviewCandidateUsers
+      summary: Search candidate users to add into review space by username or displayName
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - name: query
+          in: query
+          required: false
+          schema: { type: string }
+          description: Fuzzy query by username or displayName
+      responses:
+        '200':
+          description: Candidate users matching query
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewCandidateUserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/review/tasks/{taskId}/members:
+    get:
+      tags: [Review]
+      operationId: getReviewMembers
+      summary: List members in the review space
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: Members list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewMemberResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Review]
+      operationId: addReviewMember
+      summary: Add a member by username (Owner only)
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddReviewMemberRequest'
+      responses:
+        '201':
+          description: Member added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewMemberResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/tasks/{taskId}/members/{userId}:
+    patch:
+      tags: [Review]
+      operationId: updateReviewMember
+      summary: Update member role (Owner only)
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - $ref: '#/components/parameters/MemberUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReviewMemberRequest'
+      responses:
+        '200':
+          description: Member updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewMemberResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/tasks/{taskId}/members/{userId}/remove:
+    post:
+      tags: [Review]
+      operationId: removeReviewMember
+      summary: Remove a member from the review space (Owner only)
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - $ref: '#/components/parameters/MemberUserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveReviewMemberRequest'
+      responses:
+        '204':
+          description: Member removed
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/tasks/{taskId}/documents:
+    get:
+      tags: [Review]
+      operationId: getReviewDocuments
+      summary: List documents in the review space
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: pageSize
+          in: query
+          required: false
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          description: Document summaries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDocumentListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Review]
+      operationId: createReviewDocument
+      summary: Create a review document (Owner only)
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewDocumentRequest'
+      responses:
+        '201':
+          description: Document created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDocumentDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+
+  /api/v1/review/tasks/{taskId}/documents/import-draft:
+    post:
+      tags: [Review]
+      operationId: importDraftReviewDocument
+      summary: Import AI draft as an independent review document (Owner only)
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportDraftReviewDocumentRequest'
+      responses:
+        '201':
+          description: Document imported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDocumentDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/tasks/{taskId}/export:
+    get:
+      tags: [Review]
+      operationId: exportReviewPackage
+      summary: Export review package as ZIP
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - name: documentId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: revisionId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: from
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: ZIP archive
+          content:
+            application/zip:
+              schema: { type: string, format: binary }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/review/documents/{documentId}:
+    get:
+      tags: [Review]
+      operationId: getReviewDocument
+      summary: Get document details
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Document details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDocumentDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Review]
+      operationId: updateReviewDocumentTitle
+      summary: Update document title (Owner or Editor)
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReviewDocumentTitleRequest'
+      responses:
+        '200':
+          description: Document updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDocumentDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/documents/{documentId}/archive:
+    post:
+      tags: [Review]
+      operationId: archiveReviewDocument
+      summary: Archive document (Owner only)
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveReviewDocumentRequest'
+      responses:
+        '200':
+          description: Document archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDocumentDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/documents/{documentId}/unarchive:
+    post:
+      tags: [Review]
+      operationId: unarchiveReviewDocument
+      summary: Unarchive document (Owner only)
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnarchiveReviewDocumentRequest'
+      responses:
+        '200':
+          description: Document unarchived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDocumentDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/documents/{documentId}/revisions:
+    get:
+      tags: [Review]
+      operationId: getReviewDocumentHistory
+      summary: Get document history (revisions and title changes)
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: pageSize
+          in: query
+          required: false
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+        - name: authorId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: from
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: History items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewHistoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Review]
+      operationId: createReviewRevision
+      summary: Save a new revision (Owner or Editor)
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRevisionRequest'
+      responses:
+        '201':
+          description: Revision created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewRevisionDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+
+  /api/v1/review/documents/{documentId}/revisions/{revisionId}:
+    get:
+      tags: [Review]
+      operationId: getReviewRevision
+      summary: Get specific revision content
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+        - name: revisionId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Revision detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewRevisionDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/review/documents/{documentId}/diff:
+    get:
+      tags: [Review]
+      operationId: getReviewRevisionDiff
+      summary: Compare two revisions
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+        - name: fromRevisionId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: toRevisionId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Line-by-line diff
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDiffResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/review/documents/{documentId}/rounds:
+    get:
+      tags: [Review]
+      operationId: getReviewRounds
+      summary: List review rounds for a document
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: pageSize
+          in: query
+          required: false
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          description: List of rounds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewRoundDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Review]
+      operationId: createReviewRound
+      summary: Start a new review round (Owner only)
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRoundRequest'
+      responses:
+        '201':
+          description: Round created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewRoundDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/rounds/{roundId}/close:
+    post:
+      tags: [Review]
+      operationId: closeReviewRound
+      summary: Close a review round (Owner only)
+      parameters:
+        - $ref: '#/components/parameters/RoundId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseReviewRoundRequest'
+      responses:
+        '200':
+          description: Round closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewRoundDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/rounds/{roundId}/cancel:
+    post:
+      tags: [Review]
+      operationId: cancelReviewRound
+      summary: Cancel a review round (Owner only)
+      parameters:
+        - $ref: '#/components/parameters/RoundId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelReviewRoundRequest'
+      responses:
+        '200':
+          description: Round cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewRoundDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/documents/{documentId}/issues:
+    get:
+      tags: [Review]
+      operationId: getDocumentReviewIssues
+      summary: List issues for a document
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+        - name: roundId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: status
+          in: query
+          required: false
+          schema: { type: string }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: pageSize
+          in: query
+          required: false
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          description: Issue list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewIssueListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Review]
+      operationId: createReviewIssue
+      summary: Create a question or issue on a document
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewIssueRequest'
+      responses:
+        '201':
+          description: Issue created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewIssueDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/issues:
+    get:
+      tags: [Review]
+      operationId: queryReviewIssues
+      summary: Query issues with filtering
+      parameters:
+        - name: taskId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: documentId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: roundId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: status
+          in: query
+          required: false
+          schema: { type: string }
+        - name: type
+          in: query
+          required: false
+          schema: { type: string }
+        - name: source
+          in: query
+          required: false
+          schema: { type: string }
+        - name: impact
+          in: query
+          required: false
+          schema: { type: string }
+        - name: reporterId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: assigneeId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: keyword
+          in: query
+          required: false
+          schema: { type: string }
+        - name: displayNo
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: awaitingResponse
+          in: query
+          required: false
+          schema: { type: boolean }
+        - name: overdue
+          in: query
+          required: false
+          schema: { type: boolean }
+        - name: filterCategory
+          in: query
+          required: false
+          schema: { type: string }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: pageSize
+          in: query
+          required: false
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+        - name: sortBy
+          in: query
+          required: false
+          schema: { type: string }
+        - name: sortOrder
+          in: query
+          required: false
+          schema: { type: string, enum: [ASC, DESC], default: DESC }
+      responses:
+        '200':
+          description: Filtered issues
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewIssueListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/review/issues/{issueId}:
+    get:
+      tags: [Review]
+      operationId: getReviewIssue
+      summary: Get issue detail
+      parameters:
+        - $ref: '#/components/parameters/IssueId'
+      responses:
+        '200':
+          description: Issue detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewIssueDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Review]
+      operationId: updateReviewIssue
+      summary: Update issue metadata (Owner or Assignee)
+      parameters:
+        - $ref: '#/components/parameters/IssueId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReviewIssueRequest'
+      responses:
+        '200':
+          description: Issue updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewIssueDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/issues/{issueId}/timeline:
+    get:
+      tags: [Review]
+      operationId: getReviewIssueTimeline
+      summary: Get issue timeline of posts and events
+      parameters:
+        - $ref: '#/components/parameters/IssueId'
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: pageSize
+          in: query
+          required: false
+          schema: { type: integer, default: 50, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          description: Timeline items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewTimelineResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/review/issues/{issueId}/posts:
+    post:
+      tags: [Review]
+      operationId: createReviewPost
+      summary: Add a post (Discussion, Answer, Follow-up, Correction)
+      parameters:
+        - $ref: '#/components/parameters/IssueId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewPostRequest'
+      responses:
+        '201':
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewPostResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/issues/{issueId}/assign:
+    post:
+      tags: [Review]
+      operationId: assignReviewIssue
+      summary: Reassign issue (Owner or Assignee)
+      parameters:
+        - $ref: '#/components/parameters/IssueId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignReviewIssueRequest'
+      responses:
+        '200':
+          description: Issue reassigned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewIssueDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/issues/{issueId}/actions:
+    post:
+      tags: [Review]
+      operationId: executeReviewIssueAction
+      summary: Execute status action (Propose resolution, Confirm, Reject, Reopen, Cancel, Restore)
+      parameters:
+        - $ref: '#/components/parameters/IssueId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewIssueActionRequest'
+      responses:
+        '200':
+          description: Action executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewIssueDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/issues/{issueId}/anchors:
+    post:
+      tags: [Review]
+      operationId: addReviewAnchor
+      summary: Add a relocated anchor
+      parameters:
+        - $ref: '#/components/parameters/IssueId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddReviewAnchorRequest'
+      responses:
+        '201':
+          description: Anchor added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewAnchorDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/review/issues/{issueId}/watch:
+    post:
+      tags: [Review]
+      operationId: watchReviewIssue
+      summary: Watch an issue
+      parameters:
+        - $ref: '#/components/parameters/IssueId'
+      responses:
+        '204':
+          description: Watched
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Review]
+      operationId: unwatchReviewIssue
+      summary: Unwatch an issue
+      parameters:
+        - $ref: '#/components/parameters/IssueId'
+      responses:
+        '204':
+          description: Unwatched
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/review/notifications:
+    get:
+      tags: [Review]
+      operationId: getReviewNotifications
+      summary: Get review notifications
+      parameters:
+        - name: unreadOnly
+          in: query
+          required: false
+          schema: { type: boolean, default: false }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: pageSize
+          in: query
+          required: false
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          description: Notifications list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewNotificationListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/review/notifications/read:
+    post:
+      tags: [Review]
+      operationId: markReviewNotificationsRead
+      summary: Mark notifications as read
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkReviewNotificationsReadRequest'
+      responses:
+        '204':
+          description: Marked as read
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
 components:
   securitySchemes:
     SessionToken:
@@ -955,6 +2017,34 @@ components:
         maxLength: 64
     RunId:
       name: runId
+      in: path
+      required: true
+      schema:
+        type: string
+        maxLength: 64
+    DocumentId:
+      name: documentId
+      in: path
+      required: true
+      schema:
+        type: string
+        maxLength: 64
+    RoundId:
+      name: roundId
+      in: path
+      required: true
+      schema:
+        type: string
+        maxLength: 64
+    IssueId:
+      name: issueId
+      in: path
+      required: true
+      schema:
+        type: string
+        maxLength: 64
+    MemberUserId:
+      name: userId
       in: path
       required: true
       schema:
@@ -1678,7 +2768,573 @@ components:
           type: string
         requestId:
           type: string
+    ReviewTodoCounts:
+      type: object
+      required: [assignedToMe, awaitingMyConfirm, awaitingProxyConfirm, unreadNotifications]
+      properties:
+        assignedToMe: { type: integer }
+        awaitingMyConfirm: { type: integer }
+        awaitingProxyConfirm: { type: integer }
+        unreadNotifications: { type: integer }
+    ReviewTaskSummary:
+      type: object
+      required: [taskId, title, role, todoCounts, createdAt, updatedAt]
+      properties:
+        taskId: { type: string }
+        title: { type: string }
+        role: { type: string, enum: [OWNER, EDITOR, REVIEWER, VIEWER] }
+        todoCounts: { $ref: '#/components/schemas/ReviewTodoCounts' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ReviewTaskListResponse:
+      type: object
+      required: [items, total, page, pageSize, asOf]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ReviewTaskSummary' }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        asOf: { type: string, format: date-time }
+    ReviewMemberResponse:
+      type: object
+      required: [userId, username, displayName, role, revision, createdBy, createdAt]
+      properties:
+        userId: { type: string }
+        username: { type: string }
+        displayName: { type: string }
+        role: { type: string, enum: [OWNER, EDITOR, REVIEWER, VIEWER] }
+        revision: { type: integer }
+        createdBy: { type: string }
+        createdAt: { type: string, format: date-time }
+    ReviewCandidateUserResponse:
+      type: object
+      required: [userId, username, displayName]
+      properties:
+        userId: { type: string }
+        username: { type: string }
+        displayName: { type: string }
+    AddReviewMemberRequest:
+      type: object
+      required: [username, role]
+      properties:
+        username: { type: string, minLength: 1, maxLength: 32 }
+        role: { type: string, enum: [EDITOR, REVIEWER, VIEWER] }
+    MemberReassignmentItem:
+      type: object
+      required: [issueId, newAssigneeId]
+      properties:
+        issueId: { type: string }
+        newAssigneeId: { type: string }
+    UpdateReviewMemberRequest:
+      type: object
+      required: [role, expectedRevision]
+      properties:
+        role: { type: string, enum: [EDITOR, REVIEWER, VIEWER] }
+        expectedRevision: { type: integer }
+        reassignment:
+          type: array
+          items: { $ref: '#/components/schemas/MemberReassignmentItem' }
+    RemoveReviewMemberRequest:
+      type: object
+      required: [expectedRevision]
+      properties:
+        expectedRevision: { type: integer }
+        reassignment:
+          type: array
+          items: { $ref: '#/components/schemas/MemberReassignmentItem' }
+        reason: { type: string, maxLength: 2000 }
+    ReviewDocumentSummary:
+      type: object
+      required: [id, taskId, title, revision, nextIssueNo, createdBy, createdAt, updatedAt, unresolvedIssueCount]
+      properties:
+        id: { type: string }
+        taskId: { type: string }
+        title: { type: string }
+        headRevisionId: { type: [string, 'null'] }
+        headVersionNo: { type: [integer, 'null'] }
+        revision: { type: integer }
+        nextIssueNo: { type: integer }
+        archivedAt: { type: [string, 'null'], format: date-time }
+        createdBy: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        openRoundId: { type: [string, 'null'] }
+        unresolvedIssueCount: { type: integer }
+    ReviewDocumentListResponse:
+      type: object
+      required: [items, total, page, pageSize, asOf]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ReviewDocumentSummary' }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        asOf: { type: string, format: date-time }
+    CreateReviewDocumentRequest:
+      type: object
+      required: [title, content]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        content: { type: string, minLength: 1 }
+    ImportDraftReviewDocumentRequest:
+      type: object
+      required: [sourceId, expectedUpdatedAt, title]
+      properties:
+        sourceId: { type: string }
+        expectedUpdatedAt: { type: string, format: date-time }
+        title: { type: string, minLength: 1, maxLength: 200 }
+    ReviewRevisionDetail:
+      type: object
+      required: [id, taskId, documentId, versionNo, content, contentHash, summary, changeType, createdBy, authorNameSnapshot, createdAt, originKind]
+      properties:
+        id: { type: string }
+        taskId: { type: string }
+        documentId: { type: string }
+        versionNo: { type: integer }
+        parentRevisionId: { type: [string, 'null'] }
+        content: { type: string }
+        contentHash: { type: string }
+        summary: { type: string }
+        changeType: { type: string, enum: [INITIAL, EDIT, RESTORE] }
+        createdBy: { type: string }
+        authorNameSnapshot: { type: string }
+        createdAt: { type: string, format: date-time }
+        originKind: { type: string, enum: [MANUAL, IMPORT_DRAFT, RESTORE] }
+        originRef: { type: [object, 'null'] }
+        relatedIssues:
+          type: array
+          items: { type: string }
+    ReviewRoundDetail:
+      type: object
+      required: [id, taskId, documentId, baselineRevisionId, baselineVersionNo, status, revision, createdBy, createdAt, totalIssues, unresolvedIssues]
+      properties:
+        id: { type: string }
+        taskId: { type: string }
+        documentId: { type: string }
+        baselineRevisionId: { type: string }
+        baselineVersionNo: { type: integer }
+        status: { type: string, enum: [OPEN, CLOSED, CANCELLED] }
+        revision: { type: integer }
+        instruction: { type: [string, 'null'] }
+        dueAt: { type: [string, 'null'], format: date-time }
+        conclusion: { type: [string, 'null'], enum: [PASS, PASS_WITH_RESIDUAL, REJECT] }
+        summary: { type: [string, 'null'] }
+        closeSnapshot: { type: [object, 'null'] }
+        createdBy: { type: string }
+        closedBy: { type: [string, 'null'] }
+        createdAt: { type: string, format: date-time }
+        closedAt: { type: [string, 'null'], format: date-time }
+        totalIssues: { type: integer }
+        unresolvedIssues: { type: integer }
+    ReviewDocumentDetail:
+      type: object
+      required: [document, currentUserRole]
+      properties:
+        document: { $ref: '#/components/schemas/ReviewDocumentSummary' }
+        headRevision: { $ref: '#/components/schemas/ReviewRevisionDetail' }
+        openRound: { $ref: '#/components/schemas/ReviewRoundDetail' }
+        currentUserRole: { type: string, enum: [OWNER, EDITOR, REVIEWER, VIEWER] }
+    UpdateReviewDocumentTitleRequest:
+      type: object
+      required: [title, expectedRevision, reason]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        expectedRevision: { type: integer }
+        reason: { type: string, minLength: 1, maxLength: 2000 }
+    ArchiveReviewDocumentRequest:
+      type: object
+      required: [expectedRevision, reason]
+      properties:
+        expectedRevision: { type: integer }
+        reason: { type: string, minLength: 1, maxLength: 2000 }
+    UnarchiveReviewDocumentRequest:
+      type: object
+      required: [expectedRevision, reason]
+      properties:
+        expectedRevision: { type: integer }
+        reason: { type: string, minLength: 1, maxLength: 2000 }
+    CreateReviewRevisionRequest:
+      type: object
+      required: [expectedRevision, expectedHeadRevisionId, content, summary]
+      properties:
+        expectedRevision: { type: integer }
+        expectedHeadRevisionId: { type: string }
+        content: { type: string, minLength: 1 }
+        summary: { type: string, minLength: 1, maxLength: 2000 }
+        relatedIssues:
+          type: array
+          items: { type: string }
+        restoredFromRevisionId: { type: string }
+    ReviewRevisionSummary:
+      type: object
+      required: [id, versionNo, summary, changeType, createdBy, authorNameSnapshot, createdAt, relatedIssueCount]
+      properties:
+        id: { type: string }
+        versionNo: { type: integer }
+        summary: { type: string }
+        changeType: { type: string }
+        createdBy: { type: string }
+        authorNameSnapshot: { type: string }
+        createdAt: { type: string, format: date-time }
+        relatedIssueCount: { type: integer }
+    ReviewTitleChangeItem:
+      type: object
+      required: [fromTitle, toTitle, reason, actorId, actorName, createdAt]
+      properties:
+        fromTitle: { type: string }
+        toTitle: { type: string }
+        reason: { type: string }
+        actorId: { type: string }
+        actorName: { type: string }
+        createdAt: { type: string, format: date-time }
+    ReviewHistoryItem:
+      type: object
+      required: [kind, createdAt]
+      properties:
+        kind: { type: string, enum: [REVISION, TITLE_CHANGE] }
+        revision: { $ref: '#/components/schemas/ReviewRevisionSummary' }
+        titleChange: { $ref: '#/components/schemas/ReviewTitleChangeItem' }
+        createdAt: { type: string, format: date-time }
+    ReviewHistoryResponse:
+      type: object
+      required: [items, total, page, pageSize, asOf]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ReviewHistoryItem' }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        asOf: { type: string, format: date-time }
+    ReviewDiffLine:
+      type: object
+      required: [type, content]
+      properties:
+        type: { type: string, enum: [EQUAL, ADD, DELETE] }
+        oldLineNo: { type: [integer, 'null'] }
+        newLineNo: { type: [integer, 'null'] }
+        content: { type: string }
+    ReviewDiffResponse:
+      type: object
+      required: [fromRevisionId, fromVersionNo, toRevisionId, toVersionNo, lines]
+      properties:
+        fromRevisionId: { type: string }
+        fromVersionNo: { type: integer }
+        toRevisionId: { type: string }
+        toVersionNo: { type: integer }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/ReviewDiffLine' }
+    CreateReviewRoundRequest:
+      type: object
+      required: [baselineRevisionId, expectedDocumentRevision]
+      properties:
+        baselineRevisionId: { type: string }
+        expectedDocumentRevision: { type: integer }
+        instruction: { type: string, maxLength: 2000 }
+        dueAt: { type: string, format: date-time }
+    CloseReviewRoundRequest:
+      type: object
+      required: [expectedRevision, conclusion]
+      properties:
+        expectedRevision: { type: integer }
+        conclusion: { type: string, enum: [PASS, PASS_WITH_RESIDUAL, REJECT] }
+        summary: { type: string, maxLength: 2000 }
+        unresolvedDispositions:
+          type: object
+          additionalProperties: { type: string }
+    CancelReviewRoundRequest:
+      type: object
+      required: [expectedRevision, reason]
+      properties:
+        expectedRevision: { type: integer }
+        reason: { type: string, minLength: 1, maxLength: 2000 }
+    ReviewAnchorInput:
+      type: object
+      required: [selectorVersion, rendererFingerprint, renderedTextHash, exactQuote, startOffset, endOffset]
+      properties:
+        selectorVersion: { type: string, default: 'v1' }
+        rendererFingerprint: { type: string }
+        renderedTextHash: { type: string }
+        exactQuote: { type: string, minLength: 1, maxLength: 2000 }
+        prefixText: { type: string, maxLength: 128 }
+        suffixText: { type: string, maxLength: 128 }
+        startOffset: { type: integer, minimum: 0 }
+        endOffset: { type: integer, minimum: 0 }
+    CreateReviewIssueRequest:
+      type: object
+      required: [title, body, type, source, impact, originRevisionId]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        body: { type: string, minLength: 1, maxLength: 10000 }
+        type: { type: string, enum: [QUESTION, MISSING, AMBIGUITY, SUGGESTION] }
+        source: { type: string, enum: [ONLINE, MEETING, CHAT, DEVELOPMENT, TESTING] }
+        impact: { type: string, enum: [BLOCKING, NORMAL] }
+        originRevisionId: { type: string }
+        assigneeId: { type: string }
+        roundId: { type: string }
+        responseDueAt: { type: string, format: date-time }
+        reportedAtNote: { type: string, format: date-time }
+        reporterNote: { type: string, maxLength: 255 }
+        anchor: { $ref: '#/components/schemas/ReviewAnchorInput' }
+    ReviewAnchorDetail:
+      type: object
+      required: [id, revisionId, kind, selectorVersion, rendererFingerprint, renderedTextHash, exactQuote, startOffset, endOffset, createdAt]
+      properties:
+        id: { type: string }
+        revisionId: { type: string }
+        kind: { type: string, enum: [ORIGINAL, RELOCATED] }
+        selectorVersion: { type: string }
+        rendererFingerprint: { type: string }
+        renderedTextHash: { type: string }
+        exactQuote: { type: string }
+        prefixText: { type: [string, 'null'] }
+        suffixText: { type: [string, 'null'] }
+        startOffset: { type: integer }
+        endOffset: { type: integer }
+        createdAt: { type: string, format: date-time }
+    ReviewResolutionDetail:
+      type: object
+      required: [kind, conclusion]
+      properties:
+        kind: { type: string, enum: [DOC_CHANGED, NO_CHANGE] }
+        conclusion: { type: string }
+        revisionId: { type: [string, 'null'] }
+        changeNote: { type: [string, 'null'] }
+        noChangeReason: { type: [string, 'null'] }
+    ReviewIssueDetail:
+      type: object
+      required: [id, taskId, documentId, displayNo, originRevisionId, originVersionNo, title, body, type, source, impact, reporterId, reporterName, assigneeId, assigneeName, status, revision, lastQuestionSeq, lastAnswerSeq, awaitingResponse, overdue, createdAt, updatedAt, postCount, watching, canConfirm, canProxyConfirm]
+      properties:
+        id: { type: string }
+        taskId: { type: string }
+        documentId: { type: string }
+        displayNo: { type: integer }
+        roundId: { type: [string, 'null'] }
+        originRevisionId: { type: string }
+        originVersionNo: { type: integer }
+        title: { type: string }
+        body: { type: string }
+        type: { type: string, enum: [QUESTION, MISSING, AMBIGUITY, SUGGESTION] }
+        source: { type: string, enum: [ONLINE, MEETING, CHAT, DEVELOPMENT, TESTING] }
+        impact: { type: string, enum: [BLOCKING, NORMAL] }
+        reporterId: { type: string }
+        reporterName: { type: string }
+        reportedAtNote: { type: [string, 'null'], format: date-time }
+        reporterNote: { type: [string, 'null'] }
+        assigneeId: { type: string }
+        assigneeName: { type: string }
+        responseDueAt: { type: [string, 'null'], format: date-time }
+        status: { type: string, enum: [OPEN, AWAITING_CONFIRMATION, RESOLVED, CANCELLED] }
+        revision: { type: integer }
+        lastQuestionSeq: { type: integer }
+        lastAnswerSeq: { type: integer }
+        firstAnswerAt: { type: [string, 'null'], format: date-time }
+        awaitingResponse: { type: boolean }
+        overdue: { type: boolean }
+        proposedResolution: { $ref: '#/components/schemas/ReviewResolutionDetail' }
+        resolvedBy: { type: [string, 'null'] }
+        resolvedByName: { type: [string, 'null'] }
+        resolvedAt: { type: [string, 'null'], format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        originalAnchor: { $ref: '#/components/schemas/ReviewAnchorDetail' }
+        latestAnchor: { $ref: '#/components/schemas/ReviewAnchorDetail' }
+        postCount: { type: integer }
+        watching: { type: boolean }
+        canConfirm: { type: boolean }
+        canProxyConfirm: { type: boolean }
+    ReviewIssueSummary:
+      type: object
+      required: [id, taskId, documentId, displayNo, originRevisionId, originVersionNo, title, type, source, impact, reporterId, reporterName, assigneeId, assigneeName, status, revision, awaitingResponse, overdue, createdAt, updatedAt, postCount]
+      properties:
+        id: { type: string }
+        taskId: { type: string }
+        documentId: { type: string }
+        displayNo: { type: integer }
+        roundId: { type: [string, 'null'] }
+        originRevisionId: { type: string }
+        originVersionNo: { type: integer }
+        title: { type: string }
+        type: { type: string, enum: [QUESTION, MISSING, AMBIGUITY, SUGGESTION] }
+        source: { type: string, enum: [ONLINE, MEETING, CHAT, DEVELOPMENT, TESTING] }
+        impact: { type: string, enum: [BLOCKING, NORMAL] }
+        reporterId: { type: string }
+        reporterName: { type: string }
+        assigneeId: { type: string }
+        assigneeName: { type: string }
+        responseDueAt: { type: [string, 'null'], format: date-time }
+        status: { type: string, enum: [OPEN, AWAITING_CONFIRMATION, RESOLVED, CANCELLED] }
+        revision: { type: integer }
+        awaitingResponse: { type: boolean }
+        overdue: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        postCount: { type: integer }
+    ReviewStatistics:
+      type: object
+      required: [totalIssues, openIssues, awaitingConfirmationIssues, resolvedIssues, cancelledIssues]
+      properties:
+        totalIssues: { type: integer }
+        openIssues: { type: integer }
+        awaitingConfirmationIssues: { type: integer }
+        resolvedIssues: { type: integer }
+        cancelledIssues: { type: integer }
+        resolutionRate: { type: [string, 'null'] }
+    ReviewIssueListResponse:
+      type: object
+      required: [items, total, page, pageSize, asOf, statistics]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ReviewIssueSummary' }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        asOf: { type: string, format: date-time }
+        statistics: { $ref: '#/components/schemas/ReviewStatistics' }
+    CreateReviewPostRequest:
+      type: object
+      required: [expectedRevision, kind, body]
+      properties:
+        expectedRevision: { type: integer }
+        kind: { type: string, enum: [DISCUSSION, ANSWER, FOLLOW_UP, CORRECTION] }
+        body: { type: string, minLength: 1, maxLength: 10000 }
+        replyToPostId: { type: string }
+        correctsPostId: { type: string }
+    ReviewPostResponse:
+      type: object
+      required: [id, issueId, issueSeq, kind, body, authorId, authorName, createdAt]
+      properties:
+        id: { type: string }
+        issueId: { type: string }
+        issueSeq: { type: integer }
+        kind: { type: string, enum: [DISCUSSION, ANSWER, FOLLOW_UP, CORRECTION] }
+        body: { type: string }
+        replyToPostId: { type: [string, 'null'] }
+        correctsPostId: { type: [string, 'null'] }
+        authorId: { type: string }
+        authorName: { type: string }
+        createdAt: { type: string, format: date-time }
+    ReviewEventResponse:
+      type: object
+      required: [id, eventType, actorId, actorName, createdAt]
+      properties:
+        id: { type: string }
+        eventType: { type: string }
+        actorId: { type: string }
+        actorName: { type: string }
+        fromState: { type: [string, 'null'] }
+        toState: { type: [string, 'null'] }
+        metadata: { type: [object, 'null'] }
+        createdAt: { type: string, format: date-time }
+    ReviewTimelineItem:
+      type: object
+      required: [kind, issueSeq, createdAt]
+      properties:
+        kind: { type: string, enum: [POST, EVENT] }
+        issueSeq: { type: integer }
+        post: { $ref: '#/components/schemas/ReviewPostResponse' }
+        event: { $ref: '#/components/schemas/ReviewEventResponse' }
+        createdAt: { type: string, format: date-time }
+    ReviewTimelineResponse:
+      type: object
+      required: [items, total, page, pageSize, asOf]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ReviewTimelineItem' }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        asOf: { type: string, format: date-time }
+    UpdateReviewIssueRequest:
+      type: object
+      required: [expectedRevision]
+      properties:
+        expectedRevision: { type: integer }
+        title: { type: string, minLength: 1, maxLength: 200 }
+        type: { type: string, enum: [QUESTION, MISSING, AMBIGUITY, SUGGESTION] }
+        source: { type: string, enum: [ONLINE, MEETING, CHAT, DEVELOPMENT, TESTING] }
+        impact: { type: string, enum: [BLOCKING, NORMAL] }
+        responseDueAt: { type: string, format: date-time }
+    AssignReviewIssueRequest:
+      type: object
+      required: [expectedRevision, assigneeId]
+      properties:
+        expectedRevision: { type: integer }
+        assigneeId: { type: string }
+        reason: { type: string, maxLength: 2000 }
+    ResolutionInput:
+      type: object
+      required: [kind, conclusion]
+      properties:
+        kind: { type: string, enum: [DOC_CHANGED, NO_CHANGE] }
+        conclusion: { type: string, minLength: 1, maxLength: 2000 }
+        revisionId: { type: string }
+        changeNote: { type: string, maxLength: 2000 }
+        noChangeReason: { type: string, maxLength: 2000 }
+    ReviewIssueActionRequest:
+      type: object
+      required: [expectedRevision, action]
+      properties:
+        expectedRevision: { type: integer }
+        action: { type: string, enum: [PROPOSE_RESOLUTION, CONFIRM, REJECT, REOPEN, CANCEL, RESTORE, REMIND] }
+        reason: { type: string, maxLength: 2000 }
+        proxyReason: { type: string, maxLength: 2000 }
+        resolution: { $ref: '#/components/schemas/ResolutionInput' }
+        duplicateIssueId: { type: string }
+    AddReviewAnchorRequest:
+      type: object
+      required: [expectedRevision, revisionId, anchor]
+      properties:
+        expectedRevision: { type: integer }
+        revisionId: { type: string }
+        anchor: { $ref: '#/components/schemas/ReviewAnchorInput' }
+        reason: { type: string, maxLength: 2000 }
+    ReviewNotificationItem:
+      type: object
+      required: [id, taskId, eventId, eventType, actorName, targetTitle, createdAt]
+      properties:
+        id: { type: string }
+        taskId: { type: string }
+        documentId: { type: [string, 'null'] }
+        issueId: { type: [string, 'null'] }
+        eventId: { type: string }
+        eventType: { type: string }
+        actorName: { type: string }
+        targetTitle: { type: string }
+        createdAt: { type: string, format: date-time }
+        readAt: { type: [string, 'null'], format: date-time }
+    ReviewNotificationListResponse:
+      type: object
+      required: [items, total, unreadCount, page, pageSize]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ReviewNotificationItem' }
+        total: { type: integer }
+        unreadCount: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+    MarkReviewNotificationsReadRequest:
+      type: object
+      required: [notificationIds]
+      properties:
+        notificationIds:
+          type: array
+          items: { type: string }
+          maxItems: 100
   responses:
+    Forbidden:
+      description: Action forbidden for current role
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     BadRequest:
       description: Invalid request
       content:

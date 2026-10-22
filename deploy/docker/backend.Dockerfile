@@ -11,6 +11,6 @@ RUN apk upgrade --no-cache \
 RUN addgroup -S -g 10001 workbench && adduser -S -D -u 10001 -G workbench workbench \
     && mkdir -p /data/uploads && chown -R workbench:workbench /data
 WORKDIR /app
-COPY --from=build /build/target/prd-control-plane-0.4.0-beta.2.jar /app/workbench.jar
+COPY --from=build /build/target/prd-control-plane-0.5.0-beta.1.jar /app/workbench.jar
 USER 10001:10001
 ENTRYPOINT ["java", "-jar", "/app/workbench.jar"]
