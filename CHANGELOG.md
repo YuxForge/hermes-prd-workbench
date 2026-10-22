@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+## 0.5.0-beta.1 — preview
+
+- Add independent **Online Requirement Review (需求线上评审)** module and collaborative workspace:
+  - Topbar and workbench direct navigation for team review collaboration, multi-revision baseline diffs, and audit exports.
+  - 4-tier project member roles (OWNER, EDITOR, REVIEWER, VIEWER) with strict RBAC enforcement.
+  - Fuzzy user search autocomplete dropdown for assigning issues and adding workspace members by username or display name.
+- Precise document text selection and physical line number mapping:
+  - Refactored selection algorithm stripping Markdown syntax noise to locate exact document lines using prefix/suffix anchors.
+  - Rich Markdown live preview in the question submission drawer with default assignee detection.
+- WeChat-style conversational dialogue flow:
+  - Dialogue bubble cards for issue discussion, replacing noisy event logs with clean left/right participant avatars, timestamps, and formatted Markdown text.
+  - Milestone cards celebrating issue resolution.
+- Streamlined resolution workflow and auto-progression:
+  - Eliminated complex resolution application modal: maintainer replies automatically transition issues to "Awaiting Confirmation".
+  - Exclusive "Resolved" and "Cancel" smooth action buttons visible only to the original reporter.
+  - Reminder nudge mechanism for pending unanswered questions.
+- Unread notification and pending task auto-clear closure:
+  - Automatically marks notifications as read when viewing issues, replying, or resolving.
+  - Re-scoped "Assigned to Me" pending counters strictly to OPEN issues, eliminating contradictory metrics.
+  - Flyway migration V017 to clean up historical stale unread notifications for replied issues.
+- Mermaid flowchart and diagram vector rendering:
+  - Integrated Mermaid vector engine in review document views and issue drawers with diagram keyword detection and responsive SVG containers.
+- High-concurrency database physical foreign key decoupling:
+  - Flyway migration V016 drops all physical foreign keys across review tables to comply with modern enterprise database design standards.
+
 ## 0.4.0-beta.2 — preview
 
 - Use shared, trusted Mermaid root-level SVG-text configuration for PRD previews and Word export, preserving Chinese node labels through strict SVG sanitization; add real Mermaid flowchart/sequence regression coverage.

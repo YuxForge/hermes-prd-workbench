@@ -38,3 +38,11 @@ class PublicContractTests(unittest.TestCase):
         Draft202012Validator(schema).validate(payload)
         payload['apiEndpoints'][0]['method'] = ''
         self.assertTrue(list(Draft202012Validator(schema).iter_errors(payload)))
+
+    def test_openapi_contract_is_valid_and_has_review_routes(self):
+        import yaml
+        openapi_doc = yaml.safe_load((ROOT / 'contracts/openapi.yaml').read_text(encoding='utf-8'))
+        self.assertIn('/api/v1/review/tasks', openapi_doc['paths'])
+        self.assertIn('/api/v1/review/issues', openapi_doc['paths'])
+        self.assertIn('ReviewTaskSummary', openapi_doc['components']['schemas'])
+        self.assertIn('ReviewIssueDetail', openapi_doc['components']['schemas'])

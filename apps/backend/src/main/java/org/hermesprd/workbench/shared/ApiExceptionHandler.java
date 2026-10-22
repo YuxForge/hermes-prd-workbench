@@ -58,7 +58,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleUnknown(Exception ex, HttpServletRequest request) {
         String requestId = currentRequestId();
-        log.warn("Unhandled error requestId={} type={}", requestId, ex.getClass().getSimpleName());
+        log.warn("Unhandled error requestId={} type={}", requestId, ex.getClass().getSimpleName(), ex);
         telemetryService.recordSystemError("SYSTEM", "API_REQUEST", "INTERNAL_ERROR", "服务内部错误");
         return body(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "服务暂时无法处理该请求");
     }
